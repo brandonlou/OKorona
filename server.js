@@ -13,17 +13,19 @@ app.use(router);
 
 server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
 
-const zipcode = "90095";
-const url = "https://www.foodbanks.net/search.php?q=" + zipcode;
-axios.get(url)
+const zipcode = "94122";
+const firstURL = "https://www.foodbanks.net/search.php?q=" + zipcode;
+const secondURL = "https://ws2.feedingamerica.org/fawebservice.asmx/GetOrganizationsByZip?zip=" + zipcode;
+
+axios.get(firstURL)
     .then(response => {
-        getData(response.data);
+        getFoodBankData1(response.data);
     })
     .catch(error => {
         console.log(error);
     });
 
-let getData = html => {
+let getFoodBankData1 = html => {
 
     $('table tbody tr', html).each((i, elem) => {
 
@@ -33,4 +35,23 @@ let getData = html => {
         console.log("\t" + address);
 
     });
+}
+
+axios.get(secondURL)
+    .then(response => {
+        getFoodBankData2(response.data);
+    })
+    .catch(error => {
+        console.log(error);
+    });
+
+let getFoodBankData2 = html => {
+    const name = $('OrganizationID', html).next().text();
+    const address = $('MailAddress Address1', html).text() + " " +
+                    $('MailAddress City', html).text() + " " +
+                    $('MailAddress State', html).text() + " " +
+                    $('MailAddress Zip', html).text();
+
+    console.log(name);
+    console.log("\t" + address);
 }
