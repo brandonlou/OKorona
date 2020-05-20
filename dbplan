@@ -1,0 +1,7 @@
+After researching between possible databases to consider for the project, we have decided on using MongoDB to support data storage 
+and organization for our project. Initially, we were deciding between MySQL and MongoDB, but performance-wise MongoDB is faster. This is
+especially the case for larger sets of data. MySQL would be ideal for a secure database, but for the purpose of our project this isn't
+a necessity. Currently, there is no code for the database, but we plan to draw a flowchart depicting the flow of information between 
+components of our project. After this is done, we plan to insert our datasets about map locations into the database as well as connect
+the database to the front-end and other parts of the project. The database would have to handle queries from the front-end, so we are 
+planning to add code to handle that later on.
