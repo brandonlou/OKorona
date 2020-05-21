@@ -1,6 +1,8 @@
 import React from "react";
-import data from "../src/exGeo.json";
+import data from "./exGeo.json";
 import ReactMapGL, { Marker } from "react-map-gl";
+import Search from "./search.js";
+import SearchBox from "./searchbox.js";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { css } from "emotion";
 
@@ -16,15 +18,21 @@ export default class App extends React.Component {
         longitude: -118.453683,
         zoom: 9,
       },
-      value: "",
       showDonations: true,
+      autoComp: {},
+      clear: false,
     };
+    this.research = false;
     this.map = null;
     this.mapRef = React.createRef();
     this.data = [];
-    this.search = React.createRef();
-    this.query = "";
+    this.options = {};
     this.onViewportChange = this._onViewportChange.bind(this);
+    this.autoComplete = this.autoComplete.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.getOptions = this.getOptions.bind(this);
+    this.clearResults = this.clearResults.bind(this);
+    this.reSearch = this.reSearch.bind(this);
   }
 
   _onViewportChange = (viewport) => {
@@ -38,6 +46,7 @@ export default class App extends React.Component {
     if (!this.map) {
       return;
     }
+
     // this.map = this.map.getMap();
     // this.map.on("load", () => {
     //   this.map.addSource("accounts", {
@@ -45,6 +54,57 @@ export default class App extends React.Component {
     //     data: this.data,
     //   });
     // });
+  }
+  clearResults() {
+    this.setState({
+      clear: true,
+    });
+  }
+
+  reSearch(bool) {
+    this.research = bool;
+  }
+
+  autoComplete(address) {
+    if (!this.research) return;
+    this.setState({
+      clear: false,
+    });
+    let endpoint =
+      "https://api.mapbox.com/geocoding/v5/mapbox.places/" + address;
+    let query =
+      ".json?&access_token=pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw";
+    fetch(endpoint + query)
+      .then((response) => response.json())
+      .then((results) => {
+        this.setState({
+          autoComp: results,
+        });
+      })
+      .catch((error) => {});
+    this.reSearch(false);
+  }
+
+  handleSubmit() {
+    console.log("submit");
+  }
+
+  getOptions() {
+    if (this.state.clear) return;
+    if (this.state.autoComp["features"]) {
+      return (
+        <React.Fragment>
+          <p style={{ height: "1vh", fontSize: "8px" }}>
+            <em>Search Results</em>
+          </p>
+          {this.state.autoComp["features"].map((option) => {
+            return (
+              <SearchBox key={option["id"]} address={option["place_name"]} />
+            );
+          })}
+        </React.Fragment>
+      );
+    }
   }
 
   componentWillUpdate() {
@@ -61,29 +121,19 @@ export default class App extends React.Component {
         >
           <div
             className={css`
-              width: 30vw;
+              width: 20vw;
               height: 100vw;
+              margin: 5px;
             `}
-            style={{ display: "inline", margin: "5px" }}
           >
-            <input
-              type="text"
-              id="search"
-              placeholder="Search..."
-              style={{ width: "80%" }}
-              ref={this.search}
-            ></input>
-            <button
-              className="submit"
-              onClick={() => {
-                this.setState({
-                  query: this.search.value,
-                });
-              }}
-              style={{ width: "20%" }}
-            >
-              Search
-            </button>
+            <div className="search">
+              <Search
+                autoComplete={this.autoComplete}
+                clearResults={this.clearResults}
+                reSearch={this.reSearch}
+              />
+            </div>
+            <div className="searchwindow">{this.getOptions()}</div>
           </div>
           <div
             className={css`
@@ -96,7 +146,7 @@ export default class App extends React.Component {
               width="100%"
               height="100%"
               maxZoom={20}
-              mapboxApiAccessToken="pk.eyJ1IjoiZ2FuZ3N0YTEyMzQ1dGVzdCIsImEiOiJjazhiNXBqaGMwMGV4M2VqeHZ6eGc3bWhiIn0.PdIld03YzyQxkORAfJL91g"
+              mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
               onViewportChange={this._onViewportChange}
               mapStyle="mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50"
               // ref={this.mapRef}
@@ -110,7 +160,7 @@ export default class App extends React.Component {
                   >
                     <button>
                       <svg
-                        class="bi bi-bag-fill"
+                        className="bi bi-bag-fill"
                         width="1em"
                         height="1em"
                         viewBox="0 0 16 16"
