@@ -1,0 +1,23 @@
+{
+    "0": {
+        "id": "0",
+        "type": "store",
+        "info": "www.info.com",
+        "latitude": "34.671",
+        "longitude": "-118.9"
+    },
+    "1": {
+        "id": "1",
+        "type": "testing center",
+        "info": "www.info.com",
+        "latitude": "33.9",
+        "longitude": "-118"
+    },
+    "2": {
+        "id": "2",
+        "type": "food bank",
+        "info": "www.info.com",
+        "latitude": "34.156",
+        "longitude": "-118.5"
+    }
+}
