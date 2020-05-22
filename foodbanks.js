@@ -66,6 +66,12 @@ foodbanks.getData = async (zipcode) => {
                 "name": place.name,
                 "address": place.address
             }
+
+            // Ignore if empty location. This is because of faulty scraping.
+            if(placeData.name == "") {
+                continue;
+            }
+
             nearbyFoodbanks.push(placeData);
             id = id + 1;
         }
