@@ -148,7 +148,7 @@ export default class App extends React.Component {
               maxZoom={20}
               mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
               onViewportChange={this._onViewportChange}
-              mapStyle="mapbox://styles/gangsta12345test/ck8b63tva08qe1jpdba1keneo"
+              mapStyle="mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50"
               // ref={this.mapRef}
             >
               {data["features"].map((pt) => {
