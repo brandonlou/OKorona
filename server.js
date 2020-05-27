@@ -28,7 +28,7 @@ if(process.env.NODE_ENV === 'production') {
 }
 
 let PORT = process.env.PORT;
-if(port == null || port == "") {
-    port = 9977;
+if(PORT == null || PORT == "") {
+    PORT = 9977;
 }
 app.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
