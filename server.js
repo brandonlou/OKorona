@@ -4,11 +4,6 @@ const foodbanks = require('./foodbanks');
 
 const app = express();
 
-// Apparently if you comment the function below it still works (???)
-app.get('/', (req, res) => {
-    res.send('Server is up and running');
-});
-
 app.get('/foodbanks/:zipcode', (req, res) => {
     const zipcode = req.params.zipcode;
     console.log(zipcode);
