@@ -7,7 +7,7 @@
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
     "start": "concurrently \" npm run server \" \"npm run client\"",
-    "install-dep": "npm install && npm install --prefix client",
+    "build": "npm install && npm install --prefix client",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
   },
   "repository": {
