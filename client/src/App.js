@@ -16,11 +16,15 @@ export default class App extends React.Component {
         height: 400,
         latitude: 34.052235,
         longitude: -118.453683,
+        zipcode: 0,
         zoom: 9,
       },
-      showDonations: true,
-      autoComp: {},
+      showFoodbanks: true,
       clear: false,
+      autoComp: {},
+      foodbanks: {},
+      testing: {},
+      stores: {},
     };
     this.research = false;
     this.map = null;
@@ -33,10 +37,12 @@ export default class App extends React.Component {
     this.getOptions = this.getOptions.bind(this);
     this.clearResults = this.clearResults.bind(this);
     this.reSearch = this.reSearch.bind(this);
+    this.getZip = this.getZip.bind(this);
   }
 
   _onViewportChange = (viewport) => {
     this.setState({ viewport: viewport });
+    this.getZip();
   };
   componentWillMount() {
     this.data = data;
@@ -46,14 +52,6 @@ export default class App extends React.Component {
     if (!this.map) {
       return;
     }
-
-    // this.map = this.map.getMap();
-    // this.map.on("load", () => {
-    //   this.map.addSource("accounts", {
-    //     type: "geojson",
-    //     data: this.data,
-    //   });
-    // });
   }
   clearResults() {
     this.setState({
@@ -63,6 +61,40 @@ export default class App extends React.Component {
 
   reSearch(bool) {
     this.research = bool;
+  }
+  getZip() {
+    let endpoint =
+      "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
+      this.state.viewport.longitude +
+      "%2C%20" +
+      this.state.viewport.latitude;
+    let query =
+      ".json?access_token=pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw";
+    fetch(endpoint + query)
+      .then((response) => response.json())
+      .then((results) => {
+        let zip = null;
+        console.log(results);
+        for (const id of results["features"]["0"]["context"]) {
+          if (id["id"].startsWith("postcode")) zip = parseInt(id["text"]);
+        }
+        this.setState({
+          zipcode: zip,
+        });
+        console.log(zip);
+        this.getFoodbanks(this.state.zipcode);
+      });
+  }
+  getFoodbanks(zip) {
+    if (!this.state.showFoodbanks) return;
+    fetch("foodbanks/" + zip)
+      .then((response) => response.json())
+      .then((results) => {
+        this.setState({
+          foodbanks: results,
+        });
+        console.log(results);
+      });
   }
 
   autoComplete(address) {
@@ -126,6 +158,18 @@ export default class App extends React.Component {
               margin: 5px;
             `}
           >
+            <input
+              type="checkbox"
+              defaultChecked="true"
+              text="Show Foodbanks"
+              onClick={() => {
+                if (this.state.zipcode) {
+                  this.getFoodbanks(this.state.zipcode);
+                } else {
+                  this.getZip();
+                }
+              }}
+            ></input>
             <div className="search">
               <Search
                 autoComplete={this.autoComplete}
