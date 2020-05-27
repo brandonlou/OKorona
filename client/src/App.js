@@ -5,6 +5,7 @@ import Search from "./search.js";
 import SearchBox from "./searchbox.js";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { css } from "emotion";
+import Nav from "./Nav.js";
 
 export default class App extends React.Component {
   constructor(props) {
@@ -16,8 +17,7 @@ export default class App extends React.Component {
         height: 400,
         latitude: 34.052235,
         longitude: -118.453683,
-        zipcode: 0,
-        zoom: 9,
+        zoom: 13,
       },
       showFoodbanks: true,
       clear: false,
@@ -33,25 +33,44 @@ export default class App extends React.Component {
     this.options = {};
     this.onViewportChange = this._onViewportChange.bind(this);
     this.autoComplete = this.autoComplete.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
     this.getOptions = this.getOptions.bind(this);
     this.clearResults = this.clearResults.bind(this);
     this.reSearch = this.reSearch.bind(this);
     this.getZip = this.getZip.bind(this);
+    this.showFood = this.showFood.bind(this);
+    this.userLoc = this.userLoc.bind(this);
   }
-
+  showFood() {
+    this.setState({
+      showFoodbanks: !this.state.showFoodbanks,
+    });
+  }
   _onViewportChange = (viewport) => {
     this.setState({ viewport: viewport });
     this.getZip();
   };
   componentWillMount() {
     this.data = data;
+    let loc = new Nav(this.userLoc);
+    loc.getLocation();
+  }
+  userLoc(lat, lon) {
+    this.setState({
+      viewport: {
+        width: 400,
+        height: 400,
+        latitude: lat,
+        longitude: lon,
+        zoom: this.state.viewport.zoom,
+      },
+    });
   }
   componentDidMount() {
     this.map = this.mapRef.current;
     if (!this.map) {
       return;
     }
+    this.getInitialLocation();
   }
   clearResults() {
     this.setState({
@@ -78,11 +97,12 @@ export default class App extends React.Component {
         for (const id of results["features"]["0"]["context"]) {
           if (id["id"].startsWith("postcode")) zip = parseInt(id["text"]);
         }
-        this.setState({
-          zipcode: zip,
-        });
+        if (!zip) {
+          alert("Unable to find current location");
+          return;
+        }
         console.log(zip);
-        this.getFoodbanks(this.state.zipcode);
+        this.getFoodbanks(zip);
       });
   }
   getFoodbanks(zip) {
@@ -90,10 +110,20 @@ export default class App extends React.Component {
     fetch("foodbanks/" + zip)
       .then((response) => response.json())
       .then((results) => {
-        this.setState({
-          foodbanks: results,
-        });
         console.log(results);
+        let foodCoords = [];
+        for (const result of results) {
+          let endpoint =
+            "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
+            result["address"].replace(" ", "+");
+          let query =
+            ".json?&access_token=pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw";
+          fetch(endpoint + query)
+            .then((response2) => response2.json())
+            .then((results2) => {
+              foodCoords.push(results2["features"][0]);
+            });
+        }
       });
   }
 
@@ -117,10 +147,6 @@ export default class App extends React.Component {
     this.reSearch(false);
   }
 
-  handleSubmit() {
-    console.log("submit");
-  }
-
   getOptions() {
     if (this.state.clear) return;
     if (this.state.autoComp["features"]) {
@@ -131,7 +157,16 @@ export default class App extends React.Component {
           </p>
           {this.state.autoComp["features"].map((option) => {
             return (
-              <SearchBox key={option["id"]} address={option["place_name"]} />
+              <SearchBox
+                onClick={() =>
+                  this.userLoc(
+                    option["geometry"]["coordinates"][1],
+                    option["geometry"]["coordinates"][0]
+                  )
+                }
+                key={option["id"]}
+                address={option["place_name"]}
+              />
             );
           })}
         </React.Fragment>
@@ -162,13 +197,7 @@ export default class App extends React.Component {
               type="checkbox"
               defaultChecked="true"
               text="Show Foodbanks"
-              onClick={() => {
-                if (this.state.zipcode) {
-                  this.getFoodbanks(this.state.zipcode);
-                } else {
-                  this.getZip();
-                }
-              }}
+              onClick={this.showFood}
             ></input>
             <div className="search">
               <Search
@@ -190,6 +219,7 @@ export default class App extends React.Component {
               width="100%"
               height="100%"
               maxZoom={20}
+              minZoom={10}
               mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
               onViewportChange={this._onViewportChange}
               mapStyle="mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50"
