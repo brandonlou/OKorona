@@ -1,7 +1,10 @@
+// To get website HTML.
 const axios = require('axios');
+
+// To parse HTML.
 const $ = require('cheerio');
 
-
+// First source.
 let alphaScrape = (html) => {
 
     let listOfFoodbanks = [];
@@ -19,7 +22,7 @@ let alphaScrape = (html) => {
     return listOfFoodbanks;
 }
 
-
+// Second source.
 let betaScrape = (html) => {
 
     let listOfFoodbanks = [];
@@ -54,7 +57,6 @@ foodbanks.getData = async (zipcode) => {
     };
 
     let nearbyFoodbanks = [];
-    let id = 0;
 
     for(const key in sources) {
         const response = await axios.get(key);
@@ -62,9 +64,9 @@ foodbanks.getData = async (zipcode) => {
         for(let i = 0; i < locations.length; i++) {
             const place = locations[i];
             const placeData = {
-                "id": id,
-                "name": place.name,
-                "address": place.address
+                type: "foodbank",
+                name: place.name,
+                address: place.address
             }
 
             // Ignore if empty location. This is because of faulty scraping.
@@ -73,9 +75,7 @@ foodbanks.getData = async (zipcode) => {
             }
 
             nearbyFoodbanks.push(placeData);
-            id = id + 1;
         }
-
     }
 
     return nearbyFoodbanks;
