@@ -1,20 +1,19 @@
 /*
-  When executed, this script fetches the latest testing center location data from the covid19-api
-  For now, writing to files is handled here itself
-  The plan is to instead pipe the output to a Python script which can take care of writing to file
+  States for which data is not available:
+  Rhode Island, Tennesse, South Dakota
 */
+
 
 const fs = require('fs');
 const fetch = require('node-fetch');
 
-const states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
-                 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 
-                'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 
-                'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 
-                'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 
-                'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 
-                'South Carolina', 'South Dakota', 'Tennesse', 'Texas', 'Utah', 'Vermont', 'Virginia', 
-                'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'];
+const states = ['alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado', 'connecticut', 
+                'delaware', 'florida', 'georgia', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 
+                'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 
+                'minnesota', 'mississippi', 'missouri', 'montana', 'nebraska', 'nevada', 'new-hampshire', 
+                'new-jersey', 'new-mexico', 'new-york', 'north-carolina', 'north-dakota', 'ohio', 
+                'oklahoma', 'oregon', 'pennsylvania', 'south-carolina', 'texas', 'utah', 'vermont',
+                'virginia', 'washington', 'west-virginia', 'wisconsin', 'wyoming'];
 
 const baseurl = 'https://covid-19-testing.github.io/locations/'; // add :state/complete.json
 
@@ -33,7 +32,7 @@ let getJson = function(url) {
 
         // If we received an OK, append the text to our locations file
         response.json().then((data) => {
-          fs.appendFile('locations.txt', JSON.stringify(data), (err) => {
+          fs.appendFile('locations.txt', JSON.stringify(data, '\n'), (err) => {
               if (err) throw err;
           });
         });
