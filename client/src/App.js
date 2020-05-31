@@ -1,11 +1,11 @@
 import React from "react";
-import data from "./exGeo.json";
-import ReactMapGL, { Marker } from "react-map-gl";
+import ReactMapGL from "react-map-gl";
 import Search from "./search.js";
 import SearchBox from "./searchbox.js";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { css } from "emotion";
 import Nav from "./Nav.js";
+import Mark from "./marker.js";
 
 export default class App extends React.Component {
   constructor(props) {
@@ -22,14 +22,17 @@ export default class App extends React.Component {
       showFoodbanks: true,
       clear: false,
       autoComp: {},
-      foodbanks: {},
       testing: {},
       stores: {},
+      bounds: {},
     };
+    this.pastFood = [];
+    this.foodbanks = [];
+    this.zips = [];
+    this.nav = null;
     this.research = false;
     this.map = null;
     this.mapRef = React.createRef();
-    this.data = [];
     this.options = {};
     this.onViewportChange = this._onViewportChange.bind(this);
     this.autoComplete = this.autoComplete.bind(this);
@@ -39,21 +42,34 @@ export default class App extends React.Component {
     this.getZip = this.getZip.bind(this);
     this.showFood = this.showFood.bind(this);
     this.userLoc = this.userLoc.bind(this);
+    //this.getBounds = this.getBounds.bind(this);
+  }
+  _onViewportChange = (viewport) => {
+    this.setState({ viewport: viewport });
+    // if (this.map) {
+    //   const bounds = this.map.getMap().getBounds();
+    //   this.setState({
+    //     bounds: {
+    //       minLat: bounds["_sw"]["lat"],
+    //       minLon: bounds["_sw"]["lng"],
+    //       maxLat: bounds["_ne"]["lat"],
+    //       maxLon: bounds["_ne"]["lng"],
+    //     },
+    //   });
+    //   this.getZipInBound();
+    // }
+  };
+
+  componentWillMount() {
+    this.nav = new Nav(this.userLoc);
+    this.nav.getLocation();
   }
   showFood() {
     this.setState({
       showFoodbanks: !this.state.showFoodbanks,
     });
   }
-  _onViewportChange = (viewport) => {
-    this.setState({ viewport: viewport });
-    this.getZip();
-  };
-  componentWillMount() {
-    this.data = data;
-    let loc = new Nav(this.userLoc);
-    loc.getLocation();
-  }
+
   userLoc(lat, lon) {
     this.setState({
       viewport: {
@@ -67,42 +83,61 @@ export default class App extends React.Component {
   }
   componentDidMount() {
     this.map = this.mapRef.current;
-    if (!this.map) {
-      return;
+    if (this.nav !== null) {
+      this.userLoc(this.nav.latitude, this.nav.longitude);
     }
-    this.getInitialLocation();
   }
-  clearResults() {
+  clearResults(bool) {
     this.setState({
-      clear: true,
+      clear: bool,
     });
   }
 
   reSearch(bool) {
     this.research = bool;
   }
-  getZip() {
+
+  getZipInBound() {
+    this.zips = [];
+    const diffLat =
+      (this.state.bounds["maxLat"] - this.state.bounds["minLat"] + 0.2) * 0.1;
+    const diffLon =
+      (this.state.bounds["maxLon"] - this.state.bounds["minLon"] + 0.2) * 0.1;
+    for (
+      let i = this.state.bounds["minLat"] - 0.1;
+      i <= this.state.bounds["maxLat"] + 0.1;
+      i += diffLat
+    ) {
+      for (
+        let j = this.state.bounds["minLon"] - 0.1;
+        j <= this.state.bounds["maxLon"] + 0.1;
+        j += diffLon
+      ) {
+        this.getZip(i, j);
+      }
+    }
+  }
+
+  getZip(lat, lon) {
     let endpoint =
       "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
-      this.state.viewport.longitude +
+      lon +
       "%2C%20" +
-      this.state.viewport.latitude;
+      lat;
     let query =
       ".json?access_token=pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw";
     fetch(endpoint + query)
       .then((response) => response.json())
       .then((results) => {
         let zip = null;
-        console.log(results);
+        if (!results["features"]) return;
         for (const id of results["features"]["0"]["context"]) {
           if (id["id"].startsWith("postcode")) zip = parseInt(id["text"]);
         }
         if (!zip) {
-          alert("Unable to find current location");
           return;
         }
-        console.log(zip);
-        this.getFoodbanks(zip);
+        if (!(this.zips.indexOf(zip) >= 0)) this.zips.push(zip);
       });
   }
   getFoodbanks(zip) {
@@ -110,8 +145,6 @@ export default class App extends React.Component {
     fetch("foodbanks/" + zip)
       .then((response) => response.json())
       .then((results) => {
-        console.log(results);
-        let foodCoords = [];
         for (const result of results) {
           let endpoint =
             "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
@@ -121,7 +154,12 @@ export default class App extends React.Component {
           fetch(endpoint + query)
             .then((response2) => response2.json())
             .then((results2) => {
-              foodCoords.push(results2["features"][0]);
+              if (results2["features"]) {
+                for (const bank of this.foodbanks) {
+                  if (bank["id"] == results2["features"][0]["id"]) return;
+                }
+                this.foodbanks.push(results2["features"][0]);
+              }
             });
         }
       });
@@ -145,10 +183,12 @@ export default class App extends React.Component {
       })
       .catch((error) => {});
     this.reSearch(false);
+    this.clearResults(false);
   }
 
   getOptions() {
     if (this.state.clear) return;
+
     if (this.state.autoComp["features"]) {
       return (
         <React.Fragment>
@@ -175,7 +215,14 @@ export default class App extends React.Component {
   }
 
   componentWillUpdate() {
-    //get new data
+    if (this.zips.length > 0) {
+      for (const zip of this.zips) {
+        this.getFoodbanks(zip);
+      }
+    }
+    if (this.foodbanks) {
+      this.pastFood = this.foodbanks.slice(0);
+    }
   }
 
   render() {
@@ -193,6 +240,7 @@ export default class App extends React.Component {
               margin: 5px;
             `}
           >
+            Show Foodbanks
             <input
               type="checkbox"
               defaultChecked="true"
@@ -201,6 +249,18 @@ export default class App extends React.Component {
             ></input>
             <div className="search">
               <Search
+                enter={() => {
+                  if (this.state.autoComp["features"]) {
+                    this.userLoc(
+                      this.state.autoComp["features"][0]["geometry"][
+                        "coordinates"
+                      ][1],
+                      this.state.autoComp["features"][0]["geometry"][
+                        "coordinates"
+                      ][0]
+                    );
+                  }
+                }}
                 autoComplete={this.autoComplete}
                 clearResults={this.clearResults}
                 reSearch={this.reSearch}
@@ -223,30 +283,20 @@ export default class App extends React.Component {
               mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
               onViewportChange={this._onViewportChange}
               mapStyle="mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50"
-              // ref={this.mapRef}
+              ref={this.mapRef}
             >
-              {data["features"].map((pt) => {
-                return (
-                  <Marker
-                    key={pt["properties"]["id"]}
-                    latitude={pt["geometry"]["coordinates"][1]}
-                    longitude={pt["geometry"]["coordinates"][0]}
-                  >
-                    <button>
-                      <svg
-                        className="bi bi-bag-fill"
-                        width="1em"
-                        height="1em"
-                        viewBox="0 0 16 16"
-                        fill="currentColor"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M1 4h14v10a2 2 0 01-2 2H3a2 2 0 01-2-2V4zm7-2.5A2.5 2.5 0 005.5 4h-1a3.5 3.5 0 117 0h-1A2.5 2.5 0 008 1.5z" />
-                      </svg>
-                    </button>
-                  </Marker>
-                );
-              })}
+              <Mark lat={37.77993} lon={-121.97802} />
+              <Mark lat={37.7239} lon={-121.93103} />
+              <Mark lat={37.5609} lon={-121.8031} />
+              {this.state.showFoodbanks === true && this.pastFood ? (
+                this.pastFood.map((pt) => {
+                  const lat = pt["geometry"]["coordinates"][1];
+                  const lon = pt["geometry"]["coordinates"][0];
+                  return <Mark key={String(pt["id"])} lat={lat} lon={lon} />;
+                })
+              ) : (
+                <div></div>
+              )}
             </ReactMapGL>
           </div>
         </div>

@@ -9,10 +9,21 @@ export default class Search extends Component {
       query: "",
     };
     this.search = React.createRef();
+    this._handleKeyDown = this._handleKeyDown.bind(this);
   }
   componentDidUpdate() {
     this.props.reSearch(true);
   }
+
+  _handleKeyDown(e) {
+    if (e.key === "Enter") this.props.enter();
+  }
+  // onEnter(e){
+  //   if(e.keyCode == 13 && this.search.current.value.length > 3){
+  //     this.props.enter();
+  //   }
+  // }
+
   render() {
     return (
       <div style={{ width: "100%", display: "flex" }}>
@@ -32,6 +43,7 @@ export default class Search extends Component {
               this.props.clearResults();
             }
           }}
+          onKeyDown={this._handleKeyDown}
         ></input>
         <button>
           <svg
