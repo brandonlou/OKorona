@@ -63,6 +63,9 @@ foodbanks.getData = async (zipcode) => {
         const locations = sources[key](response.data);
         for(let i = 0; i < locations.length; i++) {
             const place = locations[i];
+
+            // Get coords from place.address here.
+
             const placeData = {
                 type: "foodbank",
                 name: place.name,
