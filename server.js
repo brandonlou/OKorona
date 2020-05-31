@@ -35,6 +35,8 @@ stdin.addListener("data", (input) => {
     const command = input.toString().trim();
     if(command === "updateFoodbank") {
         updateFoodbankData();
+    } else if(command === "u") {
+        covidtests.getData();
     }
 });
 
