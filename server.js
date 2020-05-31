@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const foodbanks = require('./foodbanks');
+const covidtests = require('./covidtests');
 const mongo = require('mongodb').MongoClient;
 const stdin = process.openStdin();
 
