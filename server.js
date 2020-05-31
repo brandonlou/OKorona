@@ -36,14 +36,38 @@ stdin.addListener("data", (input) => {
     if(command === "updateFoodbank") {
         updateFoodbankData();
     } else if(command === "u") {
-        covidtests.getData();
+        updateCovidTestingData();
     }
 });
 
 
 const mongoURL = "mongodb://nodeClient:cs97isgreat@ds253388.mlab.com:53388/heroku_bvrv3598";
+
+const updateCovidTestingData = () => {
+    mongo.connect(mongoURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }, (err, client) => {
+        if(err) {
+            console.error(err);
+            return;
+        }
+        const db = client.db("heroku_bvrv3598");
+        (async () => {
+            const testingSites = await covidtests.getData();
+            db.collection("Resources").insertMany(testingSites, (err, result) => {
+                if(err) {
+                    console.error(err);
+                    return;
+                }
+                client.close();
+                console.log("Successfully inserted covid testing data into database.");
+            });
+        })()
+    });
+}
+
 const updateFoodbankData = () => {
-    console.log("hi");
     mongo.connect(mongoURL, {
         useNewUrlParser: true,
         useUnifiedTopology: true

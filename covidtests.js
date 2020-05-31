@@ -36,29 +36,60 @@ const getJson = async (url) => {
             address = "";
         }
 
+        // const coords = await convertAddressToCoords(address);
+        // console.log(coords);
         const siteData = {
+            type: "testing_site",
             name: name,
-            address: address
+            address: address,
+            // lat: coords.lat,
+            // lon: coords.lon
         };
         testingSites.push(siteData);
     });
-
     return testingSites;
-
 }
 
 const covidtests = {};
 covidtests.getData = async () => {
-
     let testingSites = [];
     for(const state of states) {
         const stateSites = await getJson(baseurl + state + "/complete.json");
         // Concatenate state data into testingSites array.
         testingSites = [...testingSites, ...stateSites];
     }
+    return testingSites;
+}
 
-    console.log(testingSites);
+const convertAddressToCoords = async (address) => {
 
+    if(address == "") {
+        return {
+            lat: 0.0,
+            lon: 0.0
+        };
+    }
+
+    address = address.replace(" ", "%20");
+    const response = await fetch("https://nominatim.openstreetmap.org/search/" + address + "?format=json");
+    if(!response.ok) {
+        console.log(response.statusText);
+        return;
+    }
+    const json = await response.json();
+    const lat = json[0].lat;
+    const lon = json[0].lon;
+    await sleep(2000);
+    return {
+        lat: lat,
+        lon: lon
+    }
+}
+
+const sleep = (ms) => {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
 }
 
 module.exports = covidtests;
