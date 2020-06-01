@@ -51,7 +51,7 @@ export default class Mark extends React.Component {
     return (
       <Marker latitude={this.state.lat} longitude={this.state.lon}>
         {this.state.showInfo ? (
-          <div className="markerInfo" onClick={this.props.click(this)}>
+          <div className="markerInfo">
             <div className="markerHead">
               <p style={{ width: "95%" }}>Name</p>
               <svg
