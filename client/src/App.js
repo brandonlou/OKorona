@@ -6,6 +6,7 @@ import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { css } from "emotion";
 import Nav from "./Nav.js";
 import Mark from "./marker.js";
+import Submit from "./submit.js";
 
 export default class App extends React.Component {
   constructor(props) {
@@ -25,7 +26,13 @@ export default class App extends React.Component {
       testing: {},
       stores: {},
       bounds: {},
+      showForm: false,
     };
+    this.elements = [
+      { lat: 37.77993, lon: -121.97802, id: 0, Ref: React.createRef() },
+      { lat: 37.7239, lon: -121.93103, id: 1, Ref: React.createRef() },
+      { lat: 37.72, lon: -121.9031, id: 2, Ref: React.createRef() },
+    ];
     this.pastFood = [];
     this.foodbanks = [];
     this.zips = [];
@@ -42,6 +49,7 @@ export default class App extends React.Component {
     this.getZip = this.getZip.bind(this);
     this.showFood = this.showFood.bind(this);
     this.userLoc = this.userLoc.bind(this);
+    // this.bringToTop = this.bringToTop.bind(this);
     //this.getBounds = this.getBounds.bind(this);
   }
   _onViewportChange = (viewport) => {
@@ -83,10 +91,19 @@ export default class App extends React.Component {
   }
   componentDidMount() {
     this.map = this.mapRef.current;
+
     if (this.nav !== null) {
       this.userLoc(this.nav.latitude, this.nav.longitude);
     }
+    // if (this.elements[0]["Ref"].current) {
+    //   this.bringToTop();
+    // }
   }
+  // componentDidUpdate() {
+  //   if (this.elements[0]["Ref"].current) {
+  //     this.bringToTop();
+  //   }
+  // }
   clearResults(bool) {
     this.setState({
       clear: bool,
@@ -225,9 +242,35 @@ export default class App extends React.Component {
     }
   }
 
+  // bringToTop(obj) {
+  //   let elem = this.elements;
+  //   if (!obj) return;
+  //   console.log(obj);
+  //   window.getComputedStyle(obj).getPropertyValue("z-index") =
+  //   obj.style.zIndex = 10;
+  //   for (let i = 0; i < elem.length; i++) {
+  //     if (elem[i]["id"] !== obj.state["id"]) {
+  //       elem[i]["Ref"].current.style.zIndex = 1;
+  //     }
+  //   }
+  //   for (let j = 0; j < elem.length; j++) {
+  //     elem[j]["Ref"].current.handleClick = function (num) {
+  //       for (let k = 0; k < elem.length; k++) {
+  //         if (elem) {
+  //           elem[k]["Ref"].current.style.zIndex = 10;
+  //         } else {
+  //           elem[k]["Ref"].current.style.zIndex = 1;
+  //         }
+  //       }
+  //     };
+  //     console.log(elem[j]["Ref"].current.handleClick);
+  //   }
+  // }
+
   render() {
     return (
       <div className="App">
+        {this.state.showForm ? <Submit className="popup" /> : <div></div>}
         <div
           className={css`
             display: flex;
@@ -267,6 +310,16 @@ export default class App extends React.Component {
               />
             </div>
             <div className="searchwindow">{this.getOptions()}</div>
+            <button
+              onClick={() => {
+                this.setState({
+                  showForm: true,
+                });
+              }}
+              style={{ position: "absolute", bottom: "5px" }}
+            >
+              Add Resource
+            </button>
           </div>
           <div
             className={css`
@@ -285,9 +338,19 @@ export default class App extends React.Component {
               mapStyle="mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50"
               ref={this.mapRef}
             >
-              <Mark lat={37.77993} lon={-121.97802} />
-              <Mark lat={37.7239} lon={-121.93103} />
-              <Mark lat={37.5609} lon={-121.8031} />
+              {this.state.showFoodbanks === true ? (
+                this.elements.map((pt) => (
+                  <Mark
+                    // click={(i) => this.bringToTop(i)}
+                    ref={pt["Ref"]}
+                    key={pt["id"]}
+                    lat={pt["lat"]}
+                    lon={pt["lon"]}
+                  />
+                ))
+              ) : (
+                <div></div>
+              )}
               {this.state.showFoodbanks === true && this.pastFood ? (
                 this.pastFood.map((pt) => {
                   const lat = pt["geometry"]["coordinates"][1];
