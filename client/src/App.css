@@ -45,10 +45,10 @@
   padding: 3px;
   display: flex;
   flex-direction: column;
-  position: relative;
+  position: absolute;
   z-index: 10;
-  right: 10vw;
-  bottom: 10vh;
+  right: -15vw;
+  bottom: -3vh;
 }
 
 .markerInfo:hover {
@@ -60,7 +60,12 @@
   padding: 3px;
   display: flex;
   flex-direction: relative;
-  position: relative;
+  position: absolute;
+  z-index: 10;
+}
+
+.markerSymbol {
+  position: absolute;
   z-index: -1;
 }
 
@@ -68,5 +73,30 @@
   display: flex;
   overflow: hidden;
   position: absolute;
-  bottom: 5px;
+  bottom: 3px;
+  right: 3px;
+}
+
+.component {
+  margin-left: 5px;
+}
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgb(45, 41, 54);
+  background-color: aliceblue;
+  padding: 10px;
+  z-index: 100;
+}
+
+.row {
+  left: 5vw;
+  width: 100%;
+  padding-left: 15px;
+  overflow: hidden;
+  display: flex;
+  width: 90%;
 }
