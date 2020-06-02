@@ -20,10 +20,36 @@ app.get('/foodbanks/:zipcode', (req, res) => {
 // Handles adding a resource.
 app.post('/api/add_resource', (req, res) => {
     const content = req.body;
-    console.log(content.name);
-    console.log(content.type);
-    console.log(content.address);
-    res.send("Gotcha!");
+    const name = content.name;
+    const type = content.type;
+    const address = content.address;
+
+    // Check each field has a value.
+    if(!name || !type || !address) {
+        console.log("Received bad data.");
+        res.send("Error");
+    } else {
+        // Package data to be inserted into MongoDB.
+        let data = [];
+        const resource = {
+            name: name,
+            type: type,
+            address: address
+        }
+        data.push(resource);
+        console.log("Received: " + data);
+        addResourceMongo(data);
+
+        res.send("Success!");
+    }
+});
+
+// Handles upvoting.
+app.post('/api/vote', (req, res) => {
+    const content = req.body;
+    const resourceID = content.id;
+    const value = content.value;
+    res.send("Success!");
 });
 
 // Serve static assets if in production.
@@ -35,23 +61,46 @@ if(process.env.NODE_ENV === 'production') {
     });
 }
 
+// Start up server.
 let PORT = process.env.PORT;
 if(PORT == null || PORT == "") {
     PORT = 9977;
 }
 app.listen(PORT, () => console.log(`Server has started on port ${PORT}.`));
 
+// Command line options to update database.
 stdin.addListener("data", (input) => {
     const command = input.toString().trim();
-    if(command === "updateFoodbank") {
+    if(command === "f") {
         updateFoodbankData();
-    } else if(command === "u") {
+    } else if(command === "t") {
         updateCovidTestingData();
     }
 });
 
-
 const mongoURL = "mongodb://nodeClient:cs97isgreat@ds253388.mlab.com:53388/heroku_bvrv3598";
+
+// Adds data to Resource collection in MongoDB. Data must be an array of objects.
+const addResourceMongo = (data) => {
+    mongo.connect(mongoURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }, (err, client) => {
+        if(err) {
+            console.error(err);
+            return;
+        }
+        const db = client.db("heroku_bvrv3598");
+        db.collection("Resources").insertMany(data, (err, result) => {
+            if(err) {
+                console.error(err);
+                return;
+            }
+            client.close();
+            console.log("Successfully inserted data into database.");
+        });
+    });
+}
 
 const updateCovidTestingData = () => {
     mongo.connect(mongoURL, {
