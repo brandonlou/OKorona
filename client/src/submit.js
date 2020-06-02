@@ -40,9 +40,9 @@ export default class Submit extends React.Component {
         "Content-type": "application/json"
       },
       body: JSON.stringify({
-        "name": this.state.name,
-        "address": this.state.address,
-        "type": this.state.type
+        name: this.state.name,
+        type: this.state.type,
+        address: this.state.address
       })
     });
     alert("Added " + this.state.name + " " + this.state.address + " " + this.state.type + "!");
