@@ -41,17 +41,23 @@ export default class SignUp extends React.Component {
       },
       body: JSON.stringify({
         "username": this.state.user,
-        "password": this.state.pass
+        "password": this.state.pass,
+        "signup": "" + this.state.signup,
+        "email": this.state.signup ? this.state.email : ""
       })
     })
-    .then((userID) => {
-      localStorage.setItem("userID", userID);
-    })
-    .catch((error) => {
-      alert("Invalid username!");
-      console.log(error);
+    .then((response) => {
+      if (response === "Error")
+      {
+        alert("Invalid username!");
+        console.log("Login error");
+      }
+      else
+      {
+        localStorage.setItem("userID", response);
+      }
     });
-  };
+  }
 
   render() {
     return (
