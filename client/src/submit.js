@@ -8,7 +8,7 @@ export default class Submit extends React.Component {
     this.state = {
       name: null,
       address: null,
-      type: null,
+      type: "Foodbank",
     };
     this.select = React.createRef();
     this.handleName = this.handleName.bind(this);
