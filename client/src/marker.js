@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import { Marker } from "react-map-gl";
 export default class Mark extends React.Component {
   constructor(props) {

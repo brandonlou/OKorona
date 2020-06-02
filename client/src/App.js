@@ -7,7 +7,7 @@ import { css } from "emotion";
 import Nav from "./Nav.js";
 import Mark from "./marker.js";
 import Submit from "./submit.js";
-
+import SignUp from "./signup.js";
 export default class App extends React.Component {
   constructor(props) {
     super(props);
@@ -27,7 +27,15 @@ export default class App extends React.Component {
       stores: {},
       bounds: {},
       showForm: false,
+      showSign: false,
     };
+    this.theme = [
+      {
+        name: "Frank",
+        markers: "red",
+        info: "pink",
+      },
+    ];
     this.elements = [
       { lat: 37.77993, lon: -121.97802, id: 0, Ref: React.createRef() },
       { lat: 37.7239, lon: -121.93103, id: 1, Ref: React.createRef() },
@@ -49,10 +57,13 @@ export default class App extends React.Component {
     this.getZip = this.getZip.bind(this);
     this.showFood = this.showFood.bind(this);
     this.userLoc = this.userLoc.bind(this);
+    this.sendForm = this.sendForm.bind(this);
+    this.v = null;
     // this.bringToTop = this.bringToTop.bind(this);
     //this.getBounds = this.getBounds.bind(this);
   }
   _onViewportChange = (viewport) => {
+    this.v = window.innerHeight < window.innerWidth ? "vh" : "vw";
     this.setState({ viewport: viewport });
     // if (this.map) {
     //   const bounds = this.map.getMap().getBounds();
@@ -241,7 +252,7 @@ export default class App extends React.Component {
       this.pastFood = this.foodbanks.slice(0);
     }
   }
-
+  sendForm(form) {}
   // bringToTop(obj) {
   //   let elem = this.elements;
   //   if (!obj) return;
@@ -270,6 +281,17 @@ export default class App extends React.Component {
   render() {
     return (
       <div className="App">
+        {this.state.showSign ? (
+          <SignUp
+            onClick={() => {
+              this.setState({
+                showSign: false,
+              });
+            }}
+          />
+        ) : (
+          <div></div>
+        )}
         {this.state.showForm ? (
           <Submit
             onClick={() => {
@@ -277,6 +299,7 @@ export default class App extends React.Component {
                 showForm: false,
               });
             }}
+            sendForm={(form) => this.sendForm(form)}
           />
         ) : (
           <div></div>
@@ -289,7 +312,7 @@ export default class App extends React.Component {
           <div
             className={css`
               width: 20vw;
-              height: 100vw;
+              height: 100%;
               margin: 5px;
             `}
           >
@@ -320,16 +343,105 @@ export default class App extends React.Component {
               />
             </div>
             <div className="searchwindow">{this.getOptions()}</div>
-            <button
-              onClick={() => {
-                this.setState({
-                  showForm: true,
-                });
-              }}
-              style={{ position: "absolute", bottom: "5px" }}
-            >
-              Add Resource
-            </button>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "14%",
+                  height: "5vh",
+                  width: "20vw",
+                  display: "flex",
+                }}
+              >
+                <p
+                  style={{ maxWidth: "60%" }}
+                  onClick={() => {
+                    this.setState({
+                      showForm: false,
+                      showSign: true,
+                    });
+                  }}
+                >
+                  Customize Map
+                </p>
+                <select
+                  style={{ paddingLeft: "1px" }}
+                  onChange={(e) => {
+                    console.log(e.target.value);
+                    let theme = "";
+                    switch (e.target.value) {
+                      case "Decimal":
+                        theme =
+                          "mapbox://styles/ashleytz/ckaxpmear03nw1ilnsrbf75if";
+                        break;
+                      case "Standard":
+                        theme =
+                          "mapbox://styles/ashleytz/ckaxps4bp0ukt1jpmt2uxbvg8";
+                        break;
+                      case "Blueprint":
+                        theme =
+                          "mapbox://styles/ashleytz/ckaxptnwn05b61ioon15refau";
+                        break;
+                      case "Frank":
+                        theme =
+                          "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
+                        break;
+                      default:
+                        theme =
+                          "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
+                    }
+
+                    if (this.map) {
+                      console.log(this.map.getMap());
+                      this.map.getMap().setStyle(theme);
+                    }
+                  }}
+                >
+                  <option value="Frank">Frank</option>
+                  <option value="Decimal">Decimal</option>
+                  <option value="Standard">Standard</option>
+                  <option value="Blueprint">Blueprint</option>
+                </select>
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "8%",
+                  height: "5vh",
+                  width: "20vw",
+                }}
+              >
+                <p
+                  onClick={() => {
+                    this.setState({
+                      showForm: true,
+                      showSign: false,
+                    });
+                  }}
+                >
+                  Add Resource
+                </p>
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "2%",
+                  height: "5vh",
+                  width: "20vw",
+                }}
+              >
+                <p
+                  onClick={() => {
+                    this.setState({
+                      showForm: false,
+                      showSign: true,
+                    });
+                  }}
+                >
+                  Log In / Sign Up
+                </p>
+              </div>
+            </div>
           </div>
           <div
             className={css`
