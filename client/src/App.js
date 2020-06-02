@@ -270,7 +270,17 @@ export default class App extends React.Component {
   render() {
     return (
       <div className="App">
-        {this.state.showForm ? <Submit className="popup" /> : <div></div>}
+        {this.state.showForm ? (
+          <Submit
+            onClick={() => {
+              this.setState({
+                showForm: false,
+              });
+            }}
+          />
+        ) : (
+          <div></div>
+        )}
         <div
           className={css`
             display: flex;

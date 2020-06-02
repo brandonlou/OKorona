@@ -85,18 +85,29 @@
   position: fixed;
   top: 50%;
   left: 50%;
+  width: 60vw;
+  height: 80vh;
   transform: translate(-50%, -50%);
   color: rgb(45, 41, 54);
   background-color: aliceblue;
-  padding: 10px;
   z-index: 100;
+  border-color: cornflowerblue;
+  border-radius: 3px;
+  border-style: solid none solid none;
+  border-width: 3px;
+  overflow: auto;
+  /* display: grid;
+  grid-column: auto; */
 }
 
 .row {
-  left: 5vw;
-  width: 100%;
-  padding-left: 15px;
-  overflow: hidden;
+  height: 8vh;
   display: flex;
-  width: 90%;
+  transform: translateX(25px);
+  /* justify-content: center;
+  align-content: center; */
+}
+
+p {
+  padding-left: 5px;
 }
