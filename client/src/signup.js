@@ -1,4 +1,7 @@
 import React from "react";
+
+const fetch = require("node-fetch");
+
 export default class SignUp extends React.Component {
   constructor(props) {
     super(props);
@@ -31,8 +34,30 @@ export default class SignUp extends React.Component {
     });
   }
   handleSubmit = () => {
-    alert(this.state.user + " " + this.state.pass + " ");
-  };
+    fetch('./api/login', {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        "username": this.state.user,
+        "password": this.state.pass,
+        "signup": "" + this.state.signup,
+        "email": this.state.signup ? this.state.email : ""
+      })
+    })
+    .then((response) => {
+      if (response === "Error")
+      {
+        alert("Invalid username!");
+        console.log("Login error");
+      }
+      else
+      {
+        localStorage.setItem("userID", response);
+      }
+    });
+  }
 
   render() {
     return (
@@ -115,7 +140,7 @@ export default class SignUp extends React.Component {
                 Password
               </label>
               <input
-                type="text"
+                type="password"
                 value={this.state.pass}
                 onChange={this.handlePass}
                 style={{ position: "absolute", right: "5vw", width: "60%" }}
