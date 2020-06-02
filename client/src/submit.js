@@ -13,21 +13,23 @@ export default class Submit extends React.Component {
     this.select = React.createRef();
     this.handleName = this.handleName.bind(this);
     this.handleAddress = this.handleAddress.bind(this);
+    this.handleType = this.handleType.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
   handleName(event) {
     this.setState({
-      name: event.target.value,
+      name: event.target.value
     });
   }
   handleAddress(event) {
     this.setState({
-      address: event.target.value,
+      address: event.target.value
     });
   }
 
   handleType(event) {
     this.setState({
-      type: event.target.value,
+      type: event.target.value
     });
   }
 
@@ -39,11 +41,11 @@ export default class Submit extends React.Component {
       },
       body: JSON.stringify({
         "name": this.state.name,
-        "type": this.state.type,
-        "address": this.state.address
+        "address": this.state.address,
+        "type": this.state.type
       })
     });
-    alert(this.state.name + " " + this.state.address + " " + this.state.type);
+    alert("Added " + this.state.name + " " + this.state.address + " " + this.state.type + "!");
   };
 
   render() {
