@@ -5,7 +5,7 @@ const states = [
   "alaska",
   "arizona",
   "arkansas",
-  "california",
+  "california"/*,
   "colorado",
   "connecticut",
   "delaware",
@@ -47,7 +47,7 @@ const states = [
   "washington",
   "west-virginia",
   "wisconsin",
-  "wyoming",
+  "wyoming", */
 ];
 
 const baseurl = "https://covid-19-testing.github.io/locations/"; // add :state/complete.json
@@ -56,89 +56,104 @@ const baseurl = "https://covid-19-testing.github.io/locations/"; // add :state/c
 //   https://developers.google.com/web/updates/2015/03/introduction-to-fetch
 // */
 
-const sleep = (ms) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-};
 const convertAddressToCoords = async (address) => {
-  await sleep(2000);
-  if (address == "") {
-    return {
-      lat: 0.0,
-      lon: 0.0,
-    };
+
+  // Sleep for 2 seconds before continuing to prevent massive requests to OSM.
+  await new Promise(r => setTimeout(r, 2000));
+
+  // No address specified.
+  if(!address) {
+    return null;
   }
 
-  address = address.replace(/\s/g, "%20");
-  const response = await fetch(
-    "https://nominatim.openstreetmap.org/search?q=" +
-      address +
-      "&email=ashleytz@g.ucla.edu&format=json&"
-  ).then(await sleep(2000));
-  if (!response.ok) {
-    console.log(response.statusText);
-    return;
+  // Convert whitespace to %20 for and remove #[num]
+  address = await address.replace(/\s+/g, "%20");
+  address = await address.replace(/#.*\s/, "%20");
+
+  const res = await fetch("https://nominatim.openstreetmap.org/search?q=" + address + "&format=json");
+
+  if(!res.ok) {
+      console.log(res.statusText);
+      return null;
   }
-  const json = await response.json();
-  const lat = json[0].lat;
-  const lon = json[0].lon;
-  return {
-    lat: lat,
-    lon: lon,
-  };
+
+  let data;
+  try { // Try to parse JSON response.
+    data = await res.json();
+  } catch(err) {
+    console.log(err);
+    return null;
+  }
+
+  const location = data[0]; // Get first search result.
+
+  // Location exists!
+  if(location) {
+      return {
+        lat: location.lat,
+        lon: location.lon
+      }
+
+  // Location doesn't exist :(
+  } else {
+      console.log(address + " not found on OSM!");
+      return null;
+  }
+
 };
 
 const getJson = async (url) => {
-  const response = await fetch(url);
-  if (!response.ok) {
-    console.log(response.statusText);
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    console.log(res.statusText);
     return;
   }
-
-  const json = await response.json();
+  const json = await res.json();
 
   let testingSites = [];
-  json.forEach(async (obj) => {
+  for(const obj of json) {
     const name = obj.name;
+    const address = obj.physical_address[0];
+    let addressString;
 
-    // Some testing sites do not have addresses :/
-    let address;
     try {
-      address =
-        obj.physical_address[0].address_1 +
-        " " +
-        obj.physical_address[0].city +
-        " " +
-        obj.physical_address[0].state_province +
-        " " +
-        obj.physical_address[0].postal_code;
-    } catch (error) {
-      address = "";
+      addressString = address.address_1 + " " + address.city + " " + address.state_province + " " + address.postal_code;
+    } catch(err) { // No address specified for particular testing site.
+      console.log(err);
+      continue;
     }
-    await sleep(2000);
-    const coords = await convertAddressToCoords(address);
-    await sleep(2000);
-    console.log(coords);
-    if (!coords) return;
+
+    const coords = await convertAddressToCoords(addressString);
+    
+    // Cannot get coordinates from address.
+    if(!coords) {
+      continue;
+    }
+
     const siteData = {
       type: "testing_site",
       name: name,
-      address: address,
-      lat: coords.lat,
-      lon: coords.lon,
+      address: addressString,
+      location: {
+        type: "Point",
+        coordinates: [coords.lat, coords.lon]
+      }
     };
-    testingSites.push(siteData);
+
     console.log(siteData);
-  });
+    testingSites.push(siteData);
+
+  }
+    
   return testingSites;
 };
 
 const covidtests = {};
 covidtests.getData = async () => {
   let testingSites = [];
-  for (const state of states) {
-    const stateSites = await getJson(baseurl + state + "/complete.json");
+  for (const s of states) {
+    const stateSites = await getJson(baseurl + s + "/complete.json");
     // Concatenate state data into testingSites array.
     testingSites = [...testingSites, ...stateSites];
   }
@@ -146,11 +161,3 @@ covidtests.getData = async () => {
 };
 
 module.exports = covidtests;
-
-// console.log("Sleep Loop");
-// (async () => {
-//   for (let i = 0; i < 100; i++) {
-//     console.log("Sleep");
-//     await sleep(5000);
-//   }
-// })();

@@ -9,15 +9,11 @@ const app = express();
 app.use(express.json());
 
 // Handles getting all values within a zipcode.
-app.get('/foodbanks/:zipcode', (req, res) => {
-    const zipcode = req.params.zipcode;
-    console.log(zipcode);
-    (async () => {
-        const localFoodbanks = await foodbanks.getData(zipcode);
-        res.json(localFoodbanks);
-    })()
+app.get('/api/get_resource', async (req, res) => {
+    const content = req.body;
+    const localFoodbanks = await foodbanks.getData(zipcode);
+    res.json(localFoodbanks);
 });
-
 
 // Handles logging in. Responds with the user ID.
 app.post('/api/login', async (req, res) => {
@@ -97,10 +93,7 @@ app.listen(PORT, () => console.log(`Server has started on port ${PORT}.`));
 stdin.addListener("data", (input) => {
     const command = input.toString().trim();
     if(command === "f") {
-        (async () => {
-            const userID = await findUserMongo("dgf", "hi");
-            console.log(userID);
-        })();
+        updateCovidTestingData();
     }
 });
 
@@ -184,28 +177,10 @@ const updateResourceMongo = (id, num) => {
     });
 };
 
-const updateCovidTestingData = () => {
-    mongo.connect(mongoURL, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    }, (err, client) => {
-        if(err) {
-            console.error(err);
-            return;
-        }
-        const db = client.db("heroku_bvrv3598");
-        (async () => {
-            const testingSites = await covidtests.getData();
-            db.collection("Resources").insertMany(testingSites, (err, result) => {
-                if(err) {
-                    console.error(err);
-                    return;
-                }
-                client.close();
-                console.log("Successfully inserted covid testing data into database.");
-            });
-        })()
-    });
+const updateCovidTestingData = async () => {
+    const data = await covidtests.getData();
+    await addResourceMongo(data);
+    console.log("Update covid testing data success!");
 }
 
 const updateFoodbankData = () => {
