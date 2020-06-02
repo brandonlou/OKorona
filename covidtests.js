@@ -88,6 +88,7 @@ const convertAddressToCoords = async (address) => {
     lon: lon,
   };
 };
+
 const getJson = async (url) => {
   const response = await fetch(url);
   if (!response.ok) {
@@ -128,6 +129,7 @@ const getJson = async (url) => {
       lon: coords.lon,
     };
     testingSites.push(siteData);
+    console.log(siteData);
   });
   return testingSites;
 };
@@ -142,10 +144,8 @@ covidtests.getData = async () => {
   }
   return testingSites;
 };
-covidtests.getData();
 
-console.log("Success");
-//module.exports = covidtests;
+module.exports = covidtests;
 
 // console.log("Sleep Loop");
 // (async () => {

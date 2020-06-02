@@ -6,6 +6,7 @@ const mongo = require('mongodb').MongoClient;
 const stdin = process.openStdin();
 
 const app = express();
+app.use(express.json());
 
 app.get('/foodbanks/:zipcode', (req, res) => {
     const zipcode = req.params.zipcode;
@@ -14,6 +15,15 @@ app.get('/foodbanks/:zipcode', (req, res) => {
         const localFoodbanks = await foodbanks.getData(zipcode);
         res.json(localFoodbanks);
     })()
+});
+
+// Handles adding a resource.
+app.post('/api/add_resource', (req, res) => {
+    const content = req.body;
+    console.log(content.name);
+    console.log(content.type);
+    console.log(content.address);
+    res.send("Gotcha!");
 });
 
 // Serve static assets if in production.

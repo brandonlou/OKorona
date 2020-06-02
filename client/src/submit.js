@@ -35,9 +35,9 @@ export default class Submit extends React.Component {
     fetch('./api/add_resource', {
       method: 'POST',
       body: JSON.stringify({
-        'name': this.state.name,
-        'type': this.state.type,
-        'address': this.state.address
+        name: this.state.name,
+        type: this.state.type,
+        address: this.state.address
       })
     });
     alert(this.state.name + " " + this.state.address + " " + this.state.type);
