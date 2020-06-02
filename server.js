@@ -8,11 +8,19 @@ const stdin = process.openStdin();
 const app = express();
 app.use(express.json());
 
-// Handles getting all values within a zipcode.
+// Handles getting all values within a rectangular area.
 app.get('/api/get_resource', async (req, res) => {
     const content = req.body;
-    const localFoodbanks = await foodbanks.getData(zipcode);
-    res.json(localFoodbanks);
+    const topRight = content.topRight;
+    const botLeft = content.botLeft;
+    const locations = await getLocations(topRight, botLeft);
+    if(locations) {
+        console.log("Found locations!");
+        res.json(data);
+    } else {
+        console.log("No locations");
+        res.json();
+    }
 });
 
 // Handles logging in. Responds with the user ID.
@@ -183,28 +191,28 @@ const updateCovidTestingData = async () => {
     console.log("Update covid testing data success!");
 }
 
-const updateFoodbankData = () => {
-    mongo.connect(mongoURL, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    }, (err, client) => {
-        if(err) {
-            console.error(err);
-            return;
-        }
-        const db = client.db("heroku_bvrv3598");
-        let localFoodbanks;
-        (async () => {
-            localFoodbanks = await foodbanks.getData(90054);
-            console.log(localFoodbanks);
-            db.collection("Resources").insertMany(localFoodbanks, (err, result) => {
-                if(err) {
-                    console.error(err);
-                    return;
-                }
-                console.log("Inserted!");
-                client.close();
-            });
-        })()
-    });
-}
+// const updateFoodbankData = () => {
+//     mongo.connect(mongoURL, {
+//         useNewUrlParser: true,
+//         useUnifiedTopology: true
+//     }, (err, client) => {
+//         if(err) {
+//             console.error(err);
+//             return;
+//         }
+//         const db = client.db("heroku_bvrv3598");
+//         let localFoodbanks;
+//         (async () => {
+//             localFoodbanks = await foodbanks.getData(90054);
+//             console.log(localFoodbanks);
+//             db.collection("Resources").insertMany(localFoodbanks, (err, result) => {
+//                 if(err) {
+//                     console.error(err);
+//                     return;
+//                 }
+//                 console.log("Inserted!");
+//                 client.close();
+//             });
+//         })()
+//     });
+// }

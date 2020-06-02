@@ -184,7 +184,7 @@ export default class App extends React.Component {
             .then((results2) => {
               if (results2["features"]) {
                 for (const bank of this.foodbanks) {
-                  if (bank["id"] == results2["features"][0]["id"]) return;
+                  if (bank["id"] === results2["features"][0]["id"]) return;
                 }
                 this.foodbanks.push(results2["features"][0]);
               }

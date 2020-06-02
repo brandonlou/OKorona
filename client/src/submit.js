@@ -34,6 +34,20 @@ export default class Submit extends React.Component {
   }
 
   handleSubmit = () => {
+    let type = "";
+    switch(this.state.type) {
+      case "Foodbank":
+        type = "foodbank";
+        break;
+      case "Store":
+        type = "store";
+        break;
+      case "Testing Center":
+        type = "testing_site";
+        break;
+      default:
+        break;
+    }
     fetch("./api/add_resource", {
       method: "POST",
       headers: {
@@ -41,7 +55,7 @@ export default class Submit extends React.Component {
       },
       body: JSON.stringify({
         name: this.state.name,
-        type: this.state.type,
+        type: type,
         address: this.state.address
       })
     });

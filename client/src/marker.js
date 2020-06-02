@@ -43,6 +43,8 @@ export default class Mark extends React.Component {
           bad: this.state.bad + 1,
         });
         break;
+      default:
+        break;
     }
   }
 
