@@ -8,6 +8,7 @@ const stdin = process.openStdin();
 const app = express();
 app.use(express.json());
 
+// Handles getting all values within a zipcode.
 app.get('/foodbanks/:zipcode', (req, res) => {
     const zipcode = req.params.zipcode;
     console.log(zipcode);
@@ -15,6 +16,22 @@ app.get('/foodbanks/:zipcode', (req, res) => {
         const localFoodbanks = await foodbanks.getData(zipcode);
         res.json(localFoodbanks);
     })()
+});
+
+
+// Handles logging in. Responds with the user ID.
+app.post('/api/login', async (req, res) => {
+    const content = req.body;
+    const username = content.username;
+    const password = content.password;
+    const userID = await findUserMongo(username, password);
+    if(userID) {
+        console.log("Found user ID: " + userID);
+        res.send(userID);
+    } else {
+        console.log("Could not find user ID.");
+        res.send("Error");
+    }
 });
 
 // Handles adding a resource.
@@ -44,12 +61,20 @@ app.post('/api/add_resource', (req, res) => {
     }
 });
 
-// Handles upvoting.
+// Handles thumbs up and down.
 app.post('/api/vote', (req, res) => {
     const content = req.body;
     const resourceID = content.id;
     const value = content.value;
-    res.send("Success!");
+
+    // Check resource ID is not null and value is a number.
+    if(!resourceID || isNaN(value)) {
+        console.log("Received bad data");
+        res.send("Error!");
+    } else {
+        updateResourceMongo(resourceID, value);
+        res.send("Success!");
+    }
 });
 
 // Serve static assets if in production.
@@ -72,13 +97,46 @@ app.listen(PORT, () => console.log(`Server has started on port ${PORT}.`));
 stdin.addListener("data", (input) => {
     const command = input.toString().trim();
     if(command === "f") {
-        updateFoodbankData();
-    } else if(command === "t") {
-        updateCovidTestingData();
+        (async () => {
+            const userID = await findUserMongo("dgf", "hi");
+            console.log(userID);
+        })();
     }
 });
 
 const mongoURL = "mongodb://nodeClient:cs97isgreat@ds253388.mlab.com:53388/heroku_bvrv3598";
+
+const findUserMongo = async (username, password) => {
+    
+    const client = await mongo.connect(mongoURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }).catch((err) =>{
+        console.log(err);
+        return null;
+    });
+
+    let userID = null;
+
+    try {
+        const db = client.db("heroku_bvrv3598");
+        const collection = db.collection("Users");
+        const query = { "username": username, "password": password };
+        const res = await collection.findOne(query);
+        if(res) {
+            userID = res._id;
+        }
+        
+    } catch(err) {
+        console.log(err);
+        return null;
+    } finally {
+        client.close();
+    }
+
+    return userID;
+
+};
 
 // Adds data to Resource collection in MongoDB. Data must be an array of objects.
 const addResourceMongo = (data) => {
@@ -101,6 +159,30 @@ const addResourceMongo = (data) => {
         });
     });
 }
+
+// Updates number of upvotes by resource ID. num must be a number.
+const updateResourceMongo = (id, num) => {
+    mongo.connect(mongoURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }, (err, client) => {
+        if(err) {
+            console.error(err);
+            return;
+        }
+        const db = client.db("heroku_bvrv3598");
+        const query = { "_id" : ObjectId(id) };
+        const newValue = { $set: {votes: num} }
+        db.collection("Resources").updateOne(query, newValue, (err, result) => {
+            if(err) {
+                console.error(err);
+                return;
+            }
+            client.close();
+            console.log("Successfully updated database.");
+        });
+    });
+};
 
 const updateCovidTestingData = () => {
     mongo.connect(mongoURL, {
