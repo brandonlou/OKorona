@@ -1,6 +1,6 @@
 import React from "react";
 
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
 
 export default class Submit extends React.Component {
   constructor(props) {
@@ -32,12 +32,15 @@ export default class Submit extends React.Component {
   }
 
   handleSubmit = () => {
-    fetch('./api/add_resource', {
-      method: 'POST',
+    fetch("./api/add_resource", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json"
+      },
       body: JSON.stringify({
-        'name': this.state.name,
-        'type': this.state.type,
-        'address': this.state.address
+        "name": this.state.name,
+        "type": this.state.type,
+        "address": this.state.address
       })
     });
     alert(this.state.name + " " + this.state.address + " " + this.state.type);
