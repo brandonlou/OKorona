@@ -14,14 +14,22 @@ app.get('/api/get_resource', async (req, res) => {
     const content = req.body;
     const topRight = content.topRight;
     const botLeft = content.botLeft;
-    const locations = await getLocations(topRight, botLeft);
+
+    if(!topRight || !botLeft) {
+        console.log("Did not specify top right and/or bottom left coordinate.");
+        res.json();
+        return;
+    }
+
+    const locations = await getResourcesMongo(topRight, botLeft);
     if(locations) {
-        console.log("Found locations!");
-        res.json(data);
+        res.json(locations);
+
     } else {
         console.log("No locations");
         res.json();
     }
+
 });
 
 // Handles logging in. Responds with the user ID.
@@ -65,8 +73,9 @@ app.post('/api/add_resource', async (req, res) => {
             address: address,
             location: {
                 type: "Point",
-                coordinates: [coords.lat, coords.lon]
-            }
+                coordinates: [parseFloat(coords.lon), parseFloat(coords.lat)]
+            },
+            votes: 0
         }
         const data = [resource];
         addResourceMongo(data);
@@ -107,10 +116,11 @@ if(PORT == null || PORT == "") {
 app.listen(PORT, () => console.log(`Server has started on port ${PORT}.`));
 
 // Command line options to update database.
-stdin.addListener("data", (input) => {
+stdin.addListener("data", async (input) => {
     const command = input.toString().trim();
     if(command === "f") {
-        updateCovidTestingData();
+        // const hi = await getResourcesMongo([-122.522060, 37.807606], [-122.356954, 37.707973]);
+        // console.log(hi);
     }
 });
 
@@ -196,11 +206,41 @@ const updateResourceMongo = (id, num) => {
     });
 };
 
+const getResourcesMongo = async (topRight, botLeft) => {
+    const client = await mongo.connect(mongoURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }).catch((err) =>{
+        console.log(err);
+        return null;
+    });
+
+    let resources = null;
+
+    try {
+        const db = client.db("heroku_bvrv3598");
+        const collection = db.collection("Resources");
+        const query = {"location": {"$geoWithin": {"$box": [[topRight[0], topRight[1]], [botLeft[0], botLeft[1]]]}}};
+        const res = await collection.find(query).toArray();
+        console.log("Found nearby resources: " + res.length);
+        resources = res;
+        
+    } catch(err) {
+        console.log(err);
+
+    } finally {
+        client.close();
+    }
+
+    return resources;
+
+};
+
 const updateCovidTestingData = async () => {
     const data = await covidtests.getData();
     await addResourceMongo(data);
     console.log("Update covid testing data success!");
-}
+};
 
 // const updateFoodbankData = () => {
 //     mongo.connect(mongoURL, {

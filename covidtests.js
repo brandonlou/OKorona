@@ -87,13 +87,14 @@ const getJson = async (url) => {
     }
 
     const siteData = {
-      type: "testing_site",
       name: name,
+      type: "testing_site",
       address: addressString,
       location: {
         type: "Point",
-        coordinates: [coords.lat, coords.lon]
-      }
+        coordinates: [parseFloat(coords.lon), parseFloat(coords.lat)]
+      },
+      votes: 0
     };
 
     console.log(siteData);
