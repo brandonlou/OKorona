@@ -15,10 +15,12 @@ export default class Mark extends React.Component {
       showInfo: false,
       good: 0,
       bad: 0,
+      user: localStorage.getItem("loggedIn"),
     };
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
     this.handleClick = this.handleClick.bind(this);
   }
+  componentDidMount() {}
   handleMouseEnter() {
     this.setState({
       showInfo: true,
@@ -34,14 +36,18 @@ export default class Mark extends React.Component {
   increaseValue(value) {
     switch (value) {
       case "good":
+        //if user already downvoted, switch the votes
         this.setState({
           good: this.state.good + 1,
         });
+        //fetch(post to database about the upvote)
         break;
       case "bad":
+        //if user already upvoted, switch the votes
         this.setState({
           bad: this.state.bad + 1,
         });
+        //fetch(post to database about the upvote)
         break;
       default:
         break;
@@ -81,7 +87,10 @@ export default class Mark extends React.Component {
                 viewBox="0 0 16 16"
                 fill="currentColor"
                 xmlns="http://www.w3.org/2000/svg"
-                onClick={() => this.increaseValue("good")}
+                onClick={() => {
+                  if (localStorage.getItem("loggedIn") === "true")
+                    this.increaseValue("good");
+                }}
               >
                 <path
                   fillRule="evenodd"
@@ -97,7 +106,10 @@ export default class Mark extends React.Component {
                 viewBox="0 0 16 16"
                 fill="currentColor"
                 xmlns="http://www.w3.org/2000/svg"
-                onClick={() => this.increaseValue("bad")}
+                onClick={() => {
+                  if (localStorage.getItem("loggedIn") === "true")
+                    this.increaseValue("bad");
+                }}
               >
                 <path
                   fillRule="evenodd"

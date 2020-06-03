@@ -25,9 +25,10 @@ export default class App extends React.Component {
       autoComp: {},
       testing: {},
       stores: {},
-      bounds: {},
+      // bounds: {},
       showForm: false,
       showSign: false,
+      // userLoggedIn: localStorage.getItem("LoggedIn") ? true : false,
     };
     this.theme = [
       {
@@ -58,25 +59,53 @@ export default class App extends React.Component {
     this.showFood = this.showFood.bind(this);
     this.userLoc = this.userLoc.bind(this);
     this.sendForm = this.sendForm.bind(this);
-    this.v = null;
     // this.bringToTop = this.bringToTop.bind(this);
-    //this.getBounds = this.getBounds.bind(this);
+    // this.getBounds = this.getBounds.bind(this);
   }
   _onViewportChange = (viewport) => {
-    this.v = window.innerHeight < window.innerWidth ? "vh" : "vw";
+    console.log(localStorage.getItem("loggedIn"));
+    console.log(this.state.userLoggedIn);
     this.setState({ viewport: viewport });
-    // if (this.map) {
-    //   const bounds = this.map.getMap().getBounds();
-    //   this.setState({
-    //     bounds: {
-    //       minLat: bounds["_sw"]["lat"],
-    //       minLon: bounds["_sw"]["lng"],
-    //       maxLat: bounds["_ne"]["lat"],
-    //       maxLon: bounds["_ne"]["lng"],
-    //     },
-    //   });
-    //   this.getZipInBound();
-    // }
+    if (this.map) {
+      const bounds = this.map.getMap().getBounds();
+      // this.setState({
+      //   bounds: {
+      //     minLat: bounds["_sw"]["lat"],
+      //     minLon: bounds["_sw"]["lng"],
+      //     maxLat: bounds["_ne"]["lat"],
+      //     maxLon: bounds["_ne"]["lng"],
+      //   },
+      // });
+      fetch("./api/get_resource", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topRight: [bounds["_ne"]["lng"], bounds["_ne"]["lat"]],
+          botLeft: [bounds["_sw"]["lng"], bounds["_sw"]["lat"]],
+        }),
+      })
+        .then((response) => response.json())
+        .then((response) => console.log(response));
+      // var url = new URL("./api/get_resource"),
+      //   params = {
+      //     topRight: [bounds["_ne"]["lng"], bounds["_ne"]["lat"]],
+      //     botLeft: [bounds["_sw"]["lng"], bounds["_sw"]["lat"]],
+      //   };
+      // Object.keys(params).forEach((key) =>
+      //   url.searchParams.append(key, params[key])
+      // );
+      // , {
+      //   topRight: [bounds["_ne"]["lng"], bounds["_ne"]["lat"]],
+      //   botLeft: [bounds["_sw"]["lng"], bounds["_sw"]["lat"]],
+      // }
+      //   fetch(url)
+      //     .then((response) => response.json())
+      //     .then((response) => {
+      //       console.log(response);
+      //     })
+      //     .catch((error) => console.log(error));
+      //   // this.getZipInBound();
+    }
   };
 
   componentWillMount() {
@@ -290,7 +319,7 @@ export default class App extends React.Component {
             }}
           />
         ) : (
-          <div></div>
+          <div />
         )}
         {this.state.showForm ? (
           <Submit
@@ -351,10 +380,11 @@ export default class App extends React.Component {
                   height: "5vh",
                   width: "20vw",
                   display: "flex",
+                  paddingBottom: "3px",
                 }}
               >
                 <p
-                  style={{ maxWidth: "60%" }}
+                  style={{ maxWidth: "60%", paddingBottom: "5px" }}
                   onClick={() => {
                     this.setState({
                       showForm: false,
@@ -386,6 +416,29 @@ export default class App extends React.Component {
                         theme =
                           "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
                         break;
+                      case "Night":
+                        theme =
+                          "mapbox://styles/mapbox/navigation-guidance-night-v4";
+                        break;
+                      case "Day":
+                        theme =
+                          "mapbox://styles/mapbox/navigation-guidance-day-v4";
+                        break;
+                      case "Satellite Streets":
+                        theme = "mapbox://styles/mapbox/satellite-streets-v11";
+                        break;
+                      case "Satellite":
+                        theme = "mapbox://styles/mapbox/satellite-v9";
+                        break;
+                      case "Dark":
+                        theme = "mapbox://styles/mapbox/dark-v10";
+                        break;
+                      case "Light":
+                        theme = "mapbox://styles/mapbox/light-v10";
+                        break;
+                      case "Outdoors":
+                        theme = "mapbox://styles/mapbox/outdoors-v11";
+                        break;
                       default:
                         theme =
                           "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
@@ -401,6 +454,13 @@ export default class App extends React.Component {
                   <option value="Decimal">Decimal</option>
                   <option value="Standard">Standard</option>
                   <option value="Blueprint">Blueprint</option>
+                  <option value="Night">Night</option>
+                  <option value="Day">Day</option>
+                  <option value="Satellite Streets">Satellite Streets</option>
+                  <option value="Satellite">Satellite</option>
+                  <option value="Dark">Dark</option>
+                  <option value="Light">Light</option>
+                  <option value="Outdoors">Outdoors</option>
                 </select>
               </div>
               <div
@@ -422,25 +482,49 @@ export default class App extends React.Component {
                   Add Resource
                 </p>
               </div>
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "2%",
-                  height: "5vh",
-                  width: "20vw",
-                }}
-              >
-                <p
-                  onClick={() => {
-                    this.setState({
-                      showForm: false,
-                      showSign: true,
-                    });
+              {localStorage.getItem("loggedIn") === "true" ? (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "2%",
+                    height: "5vh",
+                    width: "20vw",
                   }}
                 >
-                  Log In / Sign Up
-                </p>
-              </div>
+                  <p
+                    onClick={() => {
+                      console.log("remov");
+                      localStorage.removeItem("loggedIn");
+                      //localStorage.removeItem("userID")
+                      this.setState({
+                        userLoggedIn: false,
+                      });
+                    }}
+                  >
+                    Log out
+                  </p>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "2%",
+                    height: "5vh",
+                    width: "20vw",
+                  }}
+                >
+                  <p
+                    onClick={() => {
+                      this.setState({
+                        showForm: false,
+                        showSign: true,
+                      });
+                    }}
+                  >
+                    Log In / Sign Up
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           <div
@@ -464,6 +548,7 @@ export default class App extends React.Component {
                 this.elements.map((pt) => (
                   <Mark
                     // click={(i) => this.bringToTop(i)}
+                    //send in upvote,downvote,addressname, and
                     ref={pt["Ref"]}
                     key={pt["id"]}
                     lat={pt["lat"]}

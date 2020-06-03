@@ -10,11 +10,14 @@ export default class SignUp extends React.Component {
       user: "",
       pass: "",
       email: "",
+      invalidLogin: false,
+      invalidSignup: false,
+      timeout: false,
     };
-    this.form = React.createRef();
     this.handleUser = this.handleUser.bind(this);
     this.handlePass = this.handlePass.bind(this);
     this.handleEmail = this.handleEmail.bind(this);
+    this.invalid = this.invalid.bind(this);
   }
   handleUser(event) {
     this.setState({
@@ -33,36 +36,65 @@ export default class SignUp extends React.Component {
       email: event.target.value,
     });
   }
-  handleSubmit = () => {
-    fetch('./api/login', {
+
+  invalid() {
+    if (!(this.state.invalidLogin || this.state.invalidSignup)) return;
+    const msg = this.signup
+      ? "This username is taken!"
+      : "Invalid e-mail and password combination!";
+    return <p className="invalid">{msg}</p>;
+  }
+
+  handleSubmit = async (e) => {
+    console.log(e);
+    e.preventDefault();
+    fetch("api/login", {
       method: "POST",
       headers: {
         "Content-type": "application/json",
       },
       body: JSON.stringify({
-        "username": this.state.user,
-        "password": this.state.pass,
-        "signup": "" + this.state.signup,
-        "email": this.state.signup ? this.state.email : ""
-      })
+        username: this.state.user,
+        password: this.state.pass,
+        signup: "" + this.state.signup,
+        email: this.state.signup ? this.state.email : "",
+      }),
     })
-    .then((response) => {
-      if (response === "Error")
-      {
-        alert("Invalid username!");
-        console.log("Login error");
-      }
-      else
-      {
-        localStorage.setItem("userID", response);
-      }
-    });
-  }
+      .then((response) => {
+        console.log(response);
+        e.preventDefault();
+        if (response["ok"] === false) {
+          this.setState({
+            timeout: true,
+          });
+        } else {
+          localStorage.setItem("userID", response);
+          localStorage.setItem("loggedIn", true);
+          this.props.onClick();
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        e.preventDefault();
+        this.state.signup
+          ? this.setState({
+              invalidSignup: true,
+            })
+          : this.setState({
+              invalidLogin: true,
+            });
+      });
+  };
 
   render() {
     return (
       <div className="popup">
-        <form name="log-in" onSubmit={this.handleSubmit}>
+        <form
+          name="log-in"
+          onSubmit={(e) => {
+            this.handleSubmit(e);
+          }}
+        >
           <div className="row">
             <svg
               onClick={this.props.onClick}
@@ -86,6 +118,7 @@ export default class SignUp extends React.Component {
               />
             </svg>
           </div>
+          {this.invalid()}
           <div
             style={{
               display: "flex",
