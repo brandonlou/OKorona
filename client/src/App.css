@@ -38,7 +38,7 @@
 
 .markerInfo {
   overflow: hidden;
-  background-color: pink;
+  background-color: rgb(236, 222, 156);
   width: 25vw;
   height: 20vh;
   border-radius: 5px;
@@ -51,9 +51,9 @@
   bottom: -3vh;
 }
 
-.markerInfo:hover {
+/* .markerInfo:hover {
   overflow: hidden;
-  background-color: pink;
+  background-color: rgb(227, 236, 205);
   width: 25vw;
   height: 20vh;
   border-radius: 5px;
@@ -62,7 +62,7 @@
   flex-direction: relative;
   position: absolute;
   z-index: 10;
-}
+} */
 
 .markerSymbol {
   position: absolute;
@@ -148,7 +148,9 @@ p {
   background-color: rgb(59, 79, 116);
   color: rgb(241, 235, 235);
   text-align: center;
-  width: 100%;
+  max-width: 100%;
+  padding-left: 1vh;
+  padding-right: 1vh;
 }
 
 .button:hover {
@@ -158,7 +160,9 @@ p {
   background-color: cornflowerblue;
   color: rgb(241, 235, 235);
   text-align: center;
-  width: 100%;
+  max-width: 100%;
+  padding-left: 1vh;
+  padding-right: 1vh;
 }
 
 /* .button {
@@ -199,5 +203,7 @@ p {
 .grid {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   width: inherit;
 }

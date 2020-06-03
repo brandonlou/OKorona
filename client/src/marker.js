@@ -127,7 +127,7 @@ export default class Mark extends React.Component {
             width="2em"
             height="2em"
             viewBox="0 0 16 16"
-            fill="red"
+            fill={this.state.showInfo ? "rgb(236, 222, 156)" : "red"}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path

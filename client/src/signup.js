@@ -133,7 +133,7 @@ export default class SignUp extends React.Component {
           >
             <div
               className="button"
-              style={{ width: "10vw", maxHeight: "4vh" }}
+              style={{ width: "10vw", maxHeight: "4vh", marginRight: "1vw" }}
               onClick={() => {
                 this.setState({
                   signup: false,
@@ -144,7 +144,7 @@ export default class SignUp extends React.Component {
             </div>
             <div
               className="button"
-              style={{ width: "10vw", maxHeight: "4vh", paddingLeft: "1vw" }}
+              style={{ maxHeight: "4vh" }}
               onClick={() => {
                 this.setState({
                   signup: true,
@@ -154,7 +154,7 @@ export default class SignUp extends React.Component {
               SIGN UP
             </div>
           </div>
-          <div style={{ transform: "translateY(18vh)" }}>
+          <div style={{ transform: "translateY(20vh)" }}>
             <div className="row">
               <label
                 style={{ position: "absolute", left: "5%", maxWidth: "30%" }}

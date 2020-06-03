@@ -364,12 +364,11 @@ export default class App extends React.Component {
                   position: "absolute",
                   bottom: "16%",
                   height: "5vh",
-                  width: "20vw",
-                  display: "flex",
+                  maxWidth: "20vw",
                   paddingBottom: "3px",
                 }}
               >
-                <p
+                <div
                   style={{ paddingBottom: "5px" }}
                   onClick={() => {
                     this.setState({
@@ -379,7 +378,7 @@ export default class App extends React.Component {
                   }}
                 >
                   Customize Map:
-                </p>
+                </div>
               </div>
               <div
                 style={{
@@ -387,7 +386,6 @@ export default class App extends React.Component {
                   bottom: "12%",
                   height: "5vh",
                   paddingBottom: "3px",
-                  width: "100%",
                 }}
               >
                 <select
@@ -458,25 +456,7 @@ export default class App extends React.Component {
                   <option value="Outdoors">Outdoors</option>
                 </select>
               </div>
-              {/* <div
-                style={{
-                  position: "absolute",
-                  bottom: "8%",
-                  paddingBottom: "1vh",
-                }}
-              >
-                <div
-                  className="button"
-                  onClick={() => {
-                    this.setState({
-                      showForm: true,
-                      showSign: false,
-                    });
-                  }}
-                >
-                  Add Resource
-                </div>
-              </div> */}
+
               <div
                 className="button"
                 style={{
