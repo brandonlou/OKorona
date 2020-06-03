@@ -17,6 +17,9 @@ app.post('/api/get_resource', async (req, res) => {
 
     try {
         const lon1 = topRight[0];
+        const lon2 = botLeft[0];
+        const lat1 = topRight[1];
+        const lat2 = botLeft[1];
     } catch(err) {
         console.log(err);
         res.status(404).send("Did not specify top right and/or bottom left coordinates.");
