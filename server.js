@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const foodbanks = require('./foodbanks');
 const covidtests = require('./covidtests');
+const common = require('./common.js');
 const mongo = require('mongodb').MongoClient;
 const stdin = process.openStdin();
 
@@ -39,7 +40,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Handles adding a resource.
-app.post('/api/add_resource', (req, res) => {
+app.post('/api/add_resource', async (req, res) => {
     const content = req.body;
     const name = content.name;
     const type = content.type;
@@ -49,18 +50,26 @@ app.post('/api/add_resource', (req, res) => {
     if(!name || !type || !address) {
         console.log("Received bad data.");
         res.send("Error");
+
     } else {
         // Package data to be inserted into MongoDB.
-        let data = [];
+        const coords = await common.convertAddressToCoords(address);
+        console.log(coords);
+        if(!coords) {
+            res.send("Error");
+            return;
+        }
         const resource = {
             name: name,
             type: type,
-            address: address
+            address: address,
+            location: {
+                type: "Point",
+                coordinates: [coords.lat, coords.lon]
+            }
         }
-        data.push(resource);
-        console.log("Received: " + data);
+        const data = [resource];
         addResourceMongo(data);
-
         res.send("Success!");
     }
 });
@@ -140,25 +149,27 @@ const findUserMongo = async (username, password) => {
 };
 
 // Adds data to Resource collection in MongoDB. Data must be an array of objects.
-const addResourceMongo = (data) => {
-    mongo.connect(mongoURL, {
+const addResourceMongo = async (data) => {
+
+    const client = await mongo.connect(mongoURL, {
         useNewUrlParser: true,
         useUnifiedTopology: true
-    }, (err, client) => {
-        if(err) {
-            console.error(err);
-            return;
-        }
-        const db = client.db("heroku_bvrv3598");
-        db.collection("Resources").insertMany(data, (err, result) => {
-            if(err) {
-                console.error(err);
-                return;
-            }
-            client.close();
-            console.log("Successfully inserted data into database.");
-        });
+    }).catch((err) =>{
+        console.log(err);
+        return null;
     });
+
+    try {
+        const db = client.db("heroku_bvrv3598");
+        const collection = db.collection("Resources");
+        await collection.insertMany(data);
+        console.log("Successfully inserted data into database.");
+    } catch(err) {
+        console.log(err);
+    } finally {
+        client.close();
+    }
+
 }
 
 // Updates number of upvotes by resource ID. num must be a number.
