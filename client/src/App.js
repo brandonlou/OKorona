@@ -68,43 +68,29 @@ export default class App extends React.Component {
     this.setState({ viewport: viewport });
     if (this.map) {
       const bounds = this.map.getMap().getBounds();
-      // this.setState({
-      //   bounds: {
-      //     minLat: bounds["_sw"]["lat"],
-      //     minLon: bounds["_sw"]["lng"],
-      //     maxLat: bounds["_ne"]["lat"],
-      //     maxLon: bounds["_ne"]["lng"],
-      //   },
-      // });
-      fetch("./api/get_resource", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          topRight: [bounds["_ne"]["lng"], bounds["_ne"]["lat"]],
-          botLeft: [bounds["_sw"]["lng"], bounds["_sw"]["lat"]],
-        }),
-      })
-        .then((response) => response.json())
-        .then((response) => console.log(response));
-      // var url = new URL("./api/get_resource"),
-      //   params = {
-      //     topRight: [bounds["_ne"]["lng"], bounds["_ne"]["lat"]],
-      //     botLeft: [bounds["_sw"]["lng"], bounds["_sw"]["lat"]],
-      //   };
-      // Object.keys(params).forEach((key) =>
-      //   url.searchParams.append(key, params[key])
-      // );
-      // , {
-      //   topRight: [bounds["_ne"]["lng"], bounds["_ne"]["lat"]],
-      //   botLeft: [bounds["_sw"]["lng"], bounds["_sw"]["lat"]],
-      // }
-      //   fetch(url)
-      //     .then((response) => response.json())
-      //     .then((response) => {
-      //       console.log(response);
-      //     })
-      //     .catch((error) => console.log(error));
-      //   // this.getZipInBound();
+
+      fetch(
+        "/api/get_resource",
+        {
+          method: "POST",
+          header: { "Content-type": "application/json" },
+          body: JSON.stringify({
+            topRight: [bounds["_ne"]["lng"], bounds["_ne"]["lat"]],
+            botLeft: [bounds["_sw"]["lng"], bounds["_sw"]["lat"]],
+          }),
+        }
+        // {
+        //   //   method: "POST",
+        //   //   header: { "Content-type": "application/json" },
+        //   //   params: {
+        //   //     topRight: [bounds["_ne"]["lng"], bounds["_ne"]["lat"]],
+        //   //     botLeft: [bounds["_sw"]["lng"], bounds["_sw"]["lat"]],
+        //   //   },
+        // }
+      )
+        .then((response) => console.log(response))
+        // .then((response) => console.log(response))
+        .catch((error) => console.log(error));
     }
   };
 
@@ -372,11 +358,11 @@ export default class App extends React.Component {
               />
             </div>
             <div className="searchwindow">{this.getOptions()}</div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div className="grid">
               <div
                 style={{
                   position: "absolute",
-                  bottom: "14%",
+                  bottom: "16%",
                   height: "5vh",
                   width: "20vw",
                   display: "flex",
@@ -384,7 +370,7 @@ export default class App extends React.Component {
                 }}
               >
                 <p
-                  style={{ maxWidth: "60%", paddingBottom: "5px" }}
+                  style={{ paddingBottom: "5px" }}
                   onClick={() => {
                     this.setState({
                       showForm: false,
@@ -392,10 +378,19 @@ export default class App extends React.Component {
                     });
                   }}
                 >
-                  Customize Map
+                  Customize Map:
                 </p>
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "12%",
+                  height: "5vh",
+                  paddingBottom: "3px",
+                  width: "100%",
+                }}
+              >
                 <select
-                  style={{ paddingLeft: "1px" }}
                   onChange={(e) => {
                     console.log(e.target.value);
                     let theme = "";
@@ -463,15 +458,15 @@ export default class App extends React.Component {
                   <option value="Outdoors">Outdoors</option>
                 </select>
               </div>
-              <div
+              {/* <div
                 style={{
                   position: "absolute",
                   bottom: "8%",
-                  height: "5vh",
-                  width: "20vw",
+                  paddingBottom: "1vh",
                 }}
               >
-                <p
+                <div
+                  className="button"
                   onClick={() => {
                     this.setState({
                       showForm: true,
@@ -480,18 +475,37 @@ export default class App extends React.Component {
                   }}
                 >
                   Add Resource
-                </p>
+                </div>
+              </div> */}
+              <div
+                className="button"
+                style={{
+                  position: "absolute",
+                  bottom: "8%",
+                  maxWidth: "20vw",
+                }}
+              >
+                <div
+                  onClick={() => {
+                    this.setState({
+                      showForm: true,
+                      showSign: false,
+                    });
+                  }}
+                >
+                  Add Resource
+                </div>
               </div>
               {localStorage.getItem("loggedIn") === "true" ? (
                 <div
                   style={{
                     position: "absolute",
-                    bottom: "2%",
-                    height: "5vh",
-                    width: "20vw",
+                    bottom: "4%",
+                    maxWidth: "20vw",
                   }}
                 >
-                  <p
+                  <div
+                    className="button"
                     onClick={() => {
                       console.log("remov");
                       localStorage.removeItem("loggedIn");
@@ -502,18 +516,18 @@ export default class App extends React.Component {
                     }}
                   >
                     Log out
-                  </p>
+                  </div>
                 </div>
               ) : (
                 <div
+                  className="button"
                   style={{
                     position: "absolute",
-                    bottom: "2%",
-                    height: "5vh",
-                    width: "20vw",
+                    bottom: "4%",
+                    maxWidth: "20vw",
                   }}
                 >
-                  <p
+                  <div
                     onClick={() => {
                       this.setState({
                         showForm: false,
@@ -522,7 +536,7 @@ export default class App extends React.Component {
                     }}
                   >
                     Log In / Sign Up
-                  </p>
+                  </div>
                 </div>
               )}
             </div>

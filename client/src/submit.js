@@ -6,8 +6,8 @@ export default class Submit extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: null,
-      address: null,
+      name: "",
+      address: "",
       type: "Foodbank",
     };
     this.select = React.createRef();
@@ -18,24 +18,24 @@ export default class Submit extends React.Component {
   }
   handleName(event) {
     this.setState({
-      name: event.target.value
+      name: event.target.value,
     });
   }
   handleAddress(event) {
     this.setState({
-      address: event.target.value
+      address: event.target.value,
     });
   }
 
   handleType(event) {
     this.setState({
-      type: event.target.value
+      type: event.target.value,
     });
   }
 
-  handleSubmit = () => {
+  handleSubmit = (e) => {
     let type = "";
-    switch(this.state.type) {
+    switch (this.state.type) {
       case "Foodbank":
         type = "foodbank";
         break;
@@ -48,26 +48,48 @@ export default class Submit extends React.Component {
       default:
         break;
     }
+    e.preventDefault();
     fetch("./api/add_resource", {
       method: "POST",
       headers: {
-        "Content-type": "application/json"
+        "Content-type": "application/json",
       },
       body: JSON.stringify({
         name: this.state.name,
         type: type,
-        address: this.state.address
+        address: this.state.address,
+      }),
+    })
+      .then((response) => {
+        e.preventDefault();
+        if (response["ok"] === false) {
+          alert("Gateway Timeout");
+          return;
+        }
+        alert(
+          "Added " +
+            this.state.name +
+            " " +
+            this.state.address +
+            " " +
+            this.state.type +
+            "!"
+        );
       })
-    });
-    alert("Added " + this.state.name + " " + this.state.address + " " + this.state.type + "!");
+      .catch((error) => {
+        e.preventDefault();
+        console.log(error);
+      });
   };
 
   render() {
     return (
       <div className="popup">
-        <form name="resource" onSubmit={this.handleSubmit}>
+        <form name="resource" onSubmit={(e) => this.handleSubmit(e)}>
           <div className="row">
-            <h2 style={{ width: "95%" }}>Add to our resource database!</h2>
+            <h2 style={{ width: "95%", textAlign: "center" }}>
+              Add to our resource database!
+            </h2>
             <svg
               onClick={this.props.onClick}
               style={{
@@ -87,7 +109,6 @@ export default class Submit extends React.Component {
               />
             </svg>
           </div>
-          <br />
           <p style={{ padding: "1vw", marginTop: "1vh" }}>
             Your contribution will be verified and shown on the map. Note that
             if you receive at least 10 downvotes, your addition will be removed
@@ -137,10 +158,12 @@ export default class Submit extends React.Component {
             </select>
           </div>
           <button
+            className="button"
             type="submit"
             style={{
               position: "absolute",
-              left: "50%",
+              left: "45%",
+              maxWidth: "10vw",
               bottom: "5%",
             }}
           >

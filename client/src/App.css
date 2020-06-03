@@ -100,9 +100,20 @@
   grid-column: auto; */
 }
 
+.invalid {
+  position: fixed;
+  width: 60%;
+  height: 3vh;
+  left: 50%;
+  z-index: 200;
+  background-color: rgb(245, 242, 207);
+  color: crimson;
+}
+
 .row {
   height: 8vh;
   display: flex;
+  max-width: 100%;
   transform: translateX(25px);
   margin: auto;
   /* justify-content: center;
@@ -129,4 +140,64 @@ p {
   color: rgb(45, 41, 54);
   font-size: 3em;
   font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+}
+
+.button {
+  display: inline-block;
+  border-radius: 2px;
+  background-color: rgb(59, 79, 116);
+  color: rgb(241, 235, 235);
+  text-align: center;
+  width: 100%;
+}
+
+.button:hover {
+  display: inline-block;
+  transition: background-color 600ms;
+  border-radius: 2px;
+  background-color: cornflowerblue;
+  color: rgb(241, 235, 235);
+  text-align: center;
+  width: 100%;
+}
+
+/* .button {
+  color: #fff;
+  text-transform: uppercase;
+
+  transition: all 0.3s;
+  overflow: hidden;
+  z-index: 1;
+} */
+/* .button::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  background-color: darken(#0cf, 15%);
+  transition: all 0.3s;
+  border-radius: 10rem;
+  z-index: -1;
+}
+
+.button:hover {
+  color: #fff;
+}
+
+.button::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  background-color: #0cf;
+  border-radius: 10rem;
+  z-index: -2;
+} */
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  width: inherit;
 }

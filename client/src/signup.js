@@ -95,7 +95,7 @@ export default class SignUp extends React.Component {
             this.handleSubmit(e);
           }}
         >
-          <div className="row">
+          <div className="row" style={{ maxHeight: "4vh" }}>
             <svg
               onClick={this.props.onClick}
               style={{
@@ -131,8 +131,9 @@ export default class SignUp extends React.Component {
             className="row"
             style={{ position: "absolute", transform: "translate(5vw,13vh)" }}
           >
-            <p
-              style={{ width: "10vw" }}
+            <div
+              className="button"
+              style={{ width: "10vw", maxHeight: "4vh" }}
               onClick={() => {
                 this.setState({
                   signup: false,
@@ -140,9 +141,10 @@ export default class SignUp extends React.Component {
               }}
             >
               LOG IN
-            </p>
-            <p
-              style={{ width: "10vw" }}
+            </div>
+            <div
+              className="button"
+              style={{ width: "10vw", maxHeight: "4vh", paddingLeft: "1vw" }}
               onClick={() => {
                 this.setState({
                   signup: true,
@@ -150,7 +152,7 @@ export default class SignUp extends React.Component {
               }}
             >
               SIGN UP
-            </p>
+            </div>
           </div>
           <div style={{ transform: "translateY(18vh)" }}>
             <div className="row">
@@ -198,10 +200,12 @@ export default class SignUp extends React.Component {
             )}
           </div>
           <button
+            className="button"
             type="submit"
             style={{
               position: "absolute",
-              left: "50%",
+              maxWidth: "10vw",
+              left: "45%",
               bottom: "5%",
             }}
           >
