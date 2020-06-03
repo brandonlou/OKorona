@@ -7,7 +7,7 @@ const states = [
   "alaska",
   "arizona",
   "arkansas",
-  "california"/*,
+  "california",
   "colorado",
   "connecticut",
   "delaware",
@@ -49,7 +49,7 @@ const states = [
   "washington",
   "west-virginia",
   "wisconsin",
-  "wyoming", */
+  "wyoming"
 ];
 =======
 // const fetch = require("node-fetch");
@@ -124,10 +124,10 @@ const getJson = async (url) => {
   let testingSites = [];
   for(const obj of json) {
     const name = obj.name;
-    const address = obj.physical_address[0];
     let addressString;
 
     try {
+      const address = obj.physical_address[0];
       addressString = address.address_1 + " " + address.city + " " + address.state_province + " " + address.postal_code;
     } catch(err) { // No address specified for particular testing site.
       console.log(err);

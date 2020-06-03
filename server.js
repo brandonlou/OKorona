@@ -10,24 +10,29 @@ const app = express();
 app.use(express.json());
 
 // Handles getting all values within a rectangular area.
-app.get('/api/get_resource', async (req, res) => {
+app.post('/api/get_resource', async (req, res) => {
     const content = req.body;
     const topRight = content.topRight;
     const botLeft = content.botLeft;
 
-    if(!topRight || !botLeft) {
-        console.log("Did not specify top right and/or bottom left coordinate.");
-        res.json();
+    try {
+        const lon1 = topRight[0];
+        const lon2 = botLeft[0];
+        const lat1 = topRight[1];
+        const lat2 = botLeft[1];
+    } catch(err) {
+        console.log(err);
+        res.status(404).send("Did not specify top right and/or bottom left coordinates.");
         return;
     }
 
     const locations = await getResourcesMongo(topRight, botLeft);
     if(locations) {
-        res.json(locations);
+        res.status(200).json(locations);
 
     } else {
         console.log("No locations");
-        res.json();
+        res.status(200).json({});
     }
 
 });
@@ -119,6 +124,7 @@ app.listen(PORT, () => console.log(`Server has started on port ${PORT}.`));
 stdin.addListener("data", async (input) => {
     const command = input.toString().trim();
     if(command === "f") {
+        updateCovidTestingData();
         // const hi = await getResourcesMongo([-122.522060, 37.807606], [-122.356954, 37.707973]);
         // console.log(hi);
     }
@@ -242,28 +248,8 @@ const updateCovidTestingData = async () => {
     console.log("Update covid testing data success!");
 };
 
-// const updateFoodbankData = () => {
-//     mongo.connect(mongoURL, {
-//         useNewUrlParser: true,
-//         useUnifiedTopology: true
-//     }, (err, client) => {
-//         if(err) {
-//             console.error(err);
-//             return;
-//         }
-//         const db = client.db("heroku_bvrv3598");
-//         let localFoodbanks;
-//         (async () => {
-//             localFoodbanks = await foodbanks.getData(90054);
-//             console.log(localFoodbanks);
-//             db.collection("Resources").insertMany(localFoodbanks, (err, result) => {
-//                 if(err) {
-//                     console.error(err);
-//                     return;
-//                 }
-//                 console.log("Inserted!");
-//                 client.close();
-//             });
-//         })()
-//     });
-// }
+const updateFoodbankData = async() => {
+    const data = await foodbanks.getData();
+    await addResourceMongo(data);
+    console.log("Update foodbank data success!");
+}
