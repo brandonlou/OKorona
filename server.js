@@ -119,6 +119,7 @@ app.listen(PORT, () => console.log(`Server has started on port ${PORT}.`));
 stdin.addListener("data", async (input) => {
     const command = input.toString().trim();
     if(command === "f") {
+        updateCovidTestingData();
         // const hi = await getResourcesMongo([-122.522060, 37.807606], [-122.356954, 37.707973]);
         // console.log(hi);
     }

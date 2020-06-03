@@ -14,9 +14,15 @@ common.convertAddressToCoords = async (address) => {
   
     // Convert whitespace to %20 for and remove #[num]
     address = await address.replace(/\s+/g, "%20");
-    address = await address.replace(/#.*\s/, "%20");
+    // address = await address.replace(/#.*\s/, "%20");
   
-    const res = await fetch("https://nominatim.openstreetmap.org/search?q=" + address + "&format=json");
+    let res;
+    try {
+      res = await fetch("https://nominatim.openstreetmap.org/search?q=" + address + "&format=json");
+    } catch(err) {
+      console.log(err);
+      return null;
+    }
   
     if(!res.ok) {
         console.log(res.statusText);
