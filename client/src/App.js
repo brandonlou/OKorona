@@ -63,8 +63,9 @@ export default class App extends React.Component {
     // this.getBounds = this.getBounds.bind(this);
   }
   _onViewportChange = (viewport) => {
-    console.log(localStorage.getItem("loggedIn"));
-    console.log(this.state.userLoggedIn);
+    console.log("Logged in? " + localStorage.getItem("loggedIn"));
+    console.log("User ID: " + localStorage.getItem("userID"));
+    // console.log(this.state.userLoggedIn);
     this.setState({ viewport: viewport });
     if (this.map) {
       const bounds = this.map.getMap().getBounds();
@@ -482,9 +483,9 @@ export default class App extends React.Component {
                   <div
                     className="button"
                     onClick={() => {
-                      console.log("remov");
+                      console.log("Logged out!");
                       localStorage.removeItem("loggedIn");
-                      //localStorage.removeItem("userID")
+                      localStorage.removeItem("userID");
                       this.setState({
                         userLoggedIn: false,
                       });

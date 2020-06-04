@@ -60,8 +60,8 @@ export default class SignUp extends React.Component {
         email: this.state.signup ? this.state.email : "",
       }),
     })
+    .then((response) => response.json())
       .then((response) => {
-        console.log(response);
         e.preventDefault();
         if (response["ok"] === false) {
           this.setState({
