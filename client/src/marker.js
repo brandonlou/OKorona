@@ -18,11 +18,11 @@ export default class Mark extends React.Component {
       votes: this.props.votes,
       user: localStorage.getItem("userID"),
     };
-    this.handleMouseEnter = this.handleMouseEnter.bind(this);
+    this.handleMarkerClick = this.handleMarkerClick.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleNavigate = this.handleNavigate.bind(this);
   }
-  handleMouseEnter() {
+  handleMarkerClick() {
     this.setState({
       showInfo: true,
     });
@@ -78,7 +78,7 @@ export default class Mark extends React.Component {
   render() {
     return (
       <Marker latitude={this.state.lat} longitude={this.state.lon}>
-        <div className="markerSymbol" onMouseEnter={this.handleMouseEnter}>
+        <div className="markerSymbol" onClick={this.handleMarkerClick}>
           <svg
             className="bi bi-geo-alt"
             width="2em"

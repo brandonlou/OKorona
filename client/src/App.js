@@ -137,6 +137,8 @@ export default class App extends React.Component {
                 }
                 if (add) this.stores.push(obj);
                 break;
+                default:
+                  break;
             }
           }
         })

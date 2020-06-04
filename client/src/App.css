@@ -58,23 +58,7 @@
   overflow: auto;
 }
 
-.markerInfo:hover {
-  color: rgb(44, 39, 12);
-  border: 3px solid rgb(187, 183, 163);
-  overflow: hidden;
-  background-color: rgb(255, 253, 244);
-  width: 25vmax;
-  height: 20vmax;
-  border-radius: 5px;
-  padding: 3px;
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  z-index: 100 !important;
-  right: -15vw;
-  bottom: -3vh;
-  overflow: auto;
-}
+
 .markerBottom {
   display: flex;
   flex-direction: column;
