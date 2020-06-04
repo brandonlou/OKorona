@@ -12,21 +12,18 @@ app.use(express.json());
 // Handles getting all values within a rectangular area.
 app.post('/api/get_resource', async (req, res) => {
     const content = req.body;
-    const topRight = content.topRight;
-    const botLeft = content.botLeft;
-
+    let trLon, trLat, blLon, blLat;
     try {
-        const lon1 = topRight[0];
-        const lon2 = botLeft[0];
-        const lat1 = topRight[1];
-        const lat2 = botLeft[1];
+        trLon = parseFloat(content.trLon);
+        trLat = parseFloat(content.trLat);
+        blLon = parseFloat(content.blLon);
+        blLat = parseFloat(content.blLat);
     } catch(err) {
         console.log(err);
         res.status(404).send("Did not specify top right and/or bottom left coordinates.");
         return;
     }
-
-    const locations = await getResourcesMongo(topRight, botLeft);
+    const locations = await getResourcesMongo([trLon, trLat], [blLon, blLat]);
     if(locations) {
         res.status(200).json(locations);
 

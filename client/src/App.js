@@ -69,28 +69,23 @@ export default class App extends React.Component {
     if (this.map) {
       const bounds = this.map.getMap().getBounds();
 
-      fetch(
-        "/api/get_resource",
-        {
+      fetch("/api/get_resource", {
           method: "POST",
-          header: { "Content-type": "application/json" },
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
           body: JSON.stringify({
-            topRight: [bounds["_ne"]["lng"], bounds["_ne"]["lat"]],
-            botLeft: [bounds["_sw"]["lng"], bounds["_sw"]["lat"]],
-          }),
+            trLon: bounds._ne.lng,
+            trLat: bounds._ne.lat,
+            blLon: bounds._sw.lng,
+            blLat: bounds._sw.lat
+          })
         }
-        // {
-        //   //   method: "POST",
-        //   //   header: { "Content-type": "application/json" },
-        //   //   params: {
-        //   //     topRight: [bounds["_ne"]["lng"], bounds["_ne"]["lat"]],
-        //   //     botLeft: [bounds["_sw"]["lng"], bounds["_sw"]["lat"]],
-        //   //   },
-        // }
       )
-        .then((response) => console.log(response))
-        // .then((response) => console.log(response))
-        .catch((error) => console.log(error));
+      .then((res) => res.json())
+      .then((json) => console.log(json))
+      .catch((error) => console.log(error));
     }
   };
 
