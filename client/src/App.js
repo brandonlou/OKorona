@@ -21,11 +21,10 @@ export default class App extends React.Component {
         zoom: 13,
       },
       showFoodbanks: true,
+      showStore: true,
+      showTest: true,
       clear: false,
       autoComp: {},
-      testing: {},
-      stores: {},
-      // bounds: {},
       showForm: false,
       showSign: false,
       // userLoggedIn: localStorage.getItem("LoggedIn") ? true : false,
@@ -37,12 +36,20 @@ export default class App extends React.Component {
         info: "pink",
       },
     ];
-    this.elements = [
-      { lat: 37.77993, lon: -121.97802, id: 0, Ref: React.createRef() },
-      { lat: 37.7239, lon: -121.93103, id: 1, Ref: React.createRef() },
-      { lat: 37.72, lon: -121.9031, id: 2, Ref: React.createRef() },
+    this.testing = [
+      {
+        id: "1",
+        address: "1998 Market Street San Francisco CA 914102",
+        location: {
+          coordinates: [-121.97802, 37.77993],
+          type: "Point",
+        },
+        name: "Castro Urgent Care San Francisco - Carbon Health",
+        type: "testing_site",
+        votes: 0,
+      },
     ];
-    this.pastFood = [];
+    this.stores = [];
     this.foodbanks = [];
     this.zips = [];
     this.nav = null;
@@ -56,47 +63,59 @@ export default class App extends React.Component {
     this.clearResults = this.clearResults.bind(this);
     this.reSearch = this.reSearch.bind(this);
     this.getZip = this.getZip.bind(this);
-    this.showFood = this.showFood.bind(this);
     this.userLoc = this.userLoc.bind(this);
     this.sendForm = this.sendForm.bind(this);
     // this.bringToTop = this.bringToTop.bind(this);
     // this.getBounds = this.getBounds.bind(this);
   }
   _onViewportChange = (viewport) => {
-    console.log(localStorage.getItem("loggedIn"));
-    console.log(this.state.userLoggedIn);
     this.setState({ viewport: viewport });
     if (this.map) {
       const bounds = this.map.getMap().getBounds();
-
-      fetch("/api/get_resource", {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            trLon: bounds._ne.lng,
-            trLat: bounds._ne.lat,
-            blLon: bounds._sw.lng,
-            blLat: bounds._sw.lat
-          })
-        }
-      )
-      .then((res) => res.json())
-      .then((json) => console.log(json))
-      .catch((error) => console.log(error));
+      fetch("./api/get_resource", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          trLon: bounds._ne.lng + 0.5,
+          trLat: bounds._ne.lat + 0.5,
+          blLon: bounds._sw.lng - 0.5,
+          blLat: bounds._sw.lat - 0.5,
+        }),
+      })
+        .then((res) => res.json())
+        .then((json) => {
+          for (const obj of json) {
+            switch (obj["type"]) {
+              case "testing_center":
+                for (const elem of this.testing) {
+                  if (elem["id"] != obj["id"]) this.testing.push(obj);
+                  if (this.testing.length > 20) this.testing.pop(0);
+                }
+                break;
+              case "foodbank":
+                for (const elem of this.foodbanks) {
+                  if (elem["id"] != obj["id"]) this.foodbanks.push(obj);
+                }
+                break;
+              case "store":
+                for (const elem of this.stores) {
+                  if (elem["id"] != obj["id"]) this.stores.push(obj);
+                }
+                break;
+            }
+          }
+          console.log(this.testing);
+        })
+        .catch((error) => console.log(error));
     }
   };
 
   componentWillMount() {
     this.nav = new Nav(this.userLoc);
     this.nav.getLocation();
-  }
-  showFood() {
-    this.setState({
-      showFoodbanks: !this.state.showFoodbanks,
-    });
   }
 
   userLoc(lat, lon) {
@@ -107,6 +126,7 @@ export default class App extends React.Component {
         latitude: lat,
         longitude: lon,
         zoom: this.state.viewport.zoom,
+        clear: true,
       },
     });
   }
@@ -326,13 +346,45 @@ export default class App extends React.Component {
               margin: 5px;
             `}
           >
-            Show Foodbanks
-            <input
-              type="checkbox"
-              defaultChecked="true"
-              text="Show Foodbanks"
-              onClick={this.showFood}
-            ></input>
+            <div
+              style={{
+                fontSize: "13px",
+              }}
+            >
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  onClick={() => {
+                    this.setState({
+                      showTest: !this.state.showTest,
+                    });
+                  }}
+                />
+                <span className="toggle">Testing Centers</span>
+              </label>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  onClick={() =>
+                    this.setState({
+                      showFoodbanks: !this.state.showFoodbanks,
+                    })
+                  }
+                />
+                <span className="toggle">Foodbanks</span>
+              </label>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  onClick={() => {
+                    this.setState({
+                      showSore: !this.state.showStore,
+                    });
+                  }}
+                />
+                <span className="toggle">Stores</span>
+              </label>
+            </div>
             <div className="search">
               <Search
                 enter={() => {
@@ -471,7 +523,7 @@ export default class App extends React.Component {
                   Add Resource
                 </div>
               </div>
-              {localStorage.getItem("loggedIn") === "true" ? (
+              {localStorage.getItem("userID") !== null ? (
                 <div
                   style={{
                     position: "absolute",
@@ -483,8 +535,7 @@ export default class App extends React.Component {
                     className="button"
                     onClick={() => {
                       console.log("remov");
-                      localStorage.removeItem("loggedIn");
-                      //localStorage.removeItem("userID")
+                      localStorage.removeItem("userID");
                       this.setState({
                         userLoggedIn: false,
                       });
@@ -530,29 +581,58 @@ export default class App extends React.Component {
               minZoom={10}
               mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
               onViewportChange={this._onViewportChange}
-              mapStyle="mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50"
+              mapStyle="mapbox://styles/ashleytz/ckb07cp3006nd1imm9qg9ug18"
               ref={this.mapRef}
             >
-              {this.state.showFoodbanks === true ? (
-                this.elements.map((pt) => (
+              {(this.state.showFoodbanks === true) & this.foodbanks ? (
+                this.foodbanks.map((pt) => (
                   <Mark
                     // click={(i) => this.bringToTop(i)}
                     //send in upvote,downvote,addressname, and
-                    ref={pt["Ref"]}
-                    key={pt["id"]}
-                    lat={pt["lat"]}
-                    lon={pt["lon"]}
+                    key={pt["_id"]}
+                    id={pt["_id"]}
+                    lat={pt["location"]["coordinates"][1]}
+                    lon={pt["location"]["coordinates"][0]}
+                    address={pt["address"]}
+                    type={pt["type"]}
+                    name={pt["name"]}
+                    votes={pt["votes"]}
                   />
                 ))
               ) : (
                 <div></div>
               )}
-              {this.state.showFoodbanks === true && this.pastFood ? (
-                this.pastFood.map((pt) => {
-                  const lat = pt["geometry"]["coordinates"][1];
-                  const lon = pt["geometry"]["coordinates"][0];
-                  return <Mark key={String(pt["id"])} lat={lat} lon={lon} />;
-                })
+              {this.state.showTest === true && this.testing ? (
+                this.testing.map((pt) => (
+                  <Mark
+                    // click={(i) => this.bringToTop(i)}
+                    //send in upvote,downvote,addressname, and
+                    key={pt["_id"]}
+                    id={pt["_id"]}
+                    lat={pt["location"]["coordinates"][1]}
+                    lon={pt["location"]["coordinates"][0]}
+                    address={pt["address"]}
+                    type={pt["type"]}
+                    name={pt["name"]}
+                    votes={pt["votes"]}
+                  />
+                ))
+              ) : (
+                <div></div>
+              )}
+              {this.state.showStore === true && this.stores ? (
+                this.stores.map((pt) => (
+                  <Mark
+                    key={pt["_id"]}
+                    id={pt["_id"]}
+                    lat={pt["location"]["coordinates"][1]}
+                    lon={pt["location"]["coordinates"][0]}
+                    address={pt["address"]}
+                    type={pt["type"]}
+                    name={pt["name"]}
+                    votes={pt["votes"]}
+                  />
+                ))
               ) : (
                 <div></div>
               )}

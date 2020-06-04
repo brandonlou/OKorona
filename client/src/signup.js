@@ -69,7 +69,6 @@ export default class SignUp extends React.Component {
           });
         } else {
           localStorage.setItem("userID", response);
-          localStorage.setItem("loggedIn", true);
           this.props.onClick();
         }
       })

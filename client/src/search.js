@@ -45,7 +45,11 @@ export default class Search extends Component {
           }}
           onKeyDown={this._handleKeyDown}
         ></input>
-        <button>
+        <button
+          onClick={() => {
+            if (this.search) this.autoComplete(this.search.current.value);
+          }}
+        >
           <svg
             style={{ float: "right", cursor: "pointer" }}
             className="bi bi-arrow-return-left"
