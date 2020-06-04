@@ -1,5 +1,8 @@
 import React from "react";
 import { Marker } from "react-map-gl";
+
+const navigateBaseUrl = "https://www.google.com/maps/dir/";
+
 export default class Mark extends React.Component {
   constructor(props) {
     super(props);
@@ -11,19 +14,13 @@ export default class Mark extends React.Component {
       lon: this.props.lon,
       id: this.props.key,
       type: this.props.type,
-      link:
-        "https://google.com/maps/search/" +
-        this.props.address.replace(/\s/g, "+") +
-        "/@" +
-        this.props.lat +
-        "," +
-        this.props.lon,
       showInfo: false,
       votes: this.props.votes,
       user: localStorage.getItem("userID"),
     };
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.handleNavigate = this.handleNavigate.bind(this);
   }
   componentDidMount() {}
   handleMouseEnter() {
@@ -36,6 +33,10 @@ export default class Mark extends React.Component {
     this.setState({
       showInfo: false,
     });
+  }
+
+  handleNavigate() {
+    window.open(navigateBaseUrl + "/" + this.state.lat + "," + this.state.lon + "/@?hl=en");
   }
 
   increaseValue(value) {
@@ -109,13 +110,9 @@ export default class Mark extends React.Component {
                 })}
             </div>
             <div>
-              <a
-                href={this.state.link}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Navigation Route
-              </a>
+              <button className="button" id="navigate" onClick={this.handleNavigate}>
+                Navigate (Google Maps)
+              </button>
             </div>
             <div className="markerBottom">
               <svg

@@ -160,6 +160,7 @@ p {
 
 .button:hover {
   display: inline-block;
+  cursor: pointer;
   transition: background-color 600ms;
   border-radius: 2px;
   background-color: cornflowerblue;
@@ -168,6 +169,12 @@ p {
   max-width: 100%;
   padding-left: 1vh;
   padding-right: 1vh;
+}
+
+#navigate {
+  border: 3px;
+  background-color: darkblue;
+  color: whitesmoke;
 }
 
 /* .button {
