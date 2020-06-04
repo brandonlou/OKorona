@@ -61,23 +61,14 @@ export default class Submit extends React.Component {
       }),
     })
       .then((response) => {
-        e.preventDefault();
         if (response["ok"] === false) {
           alert("Gateway Timeout");
           return;
         }
-        alert(
-          "Added " +
-            this.state.name +
-            " " +
-            this.state.address +
-            " " +
-            this.state.type +
-            "!"
-        );
+        this.props.getLoc();
+        this.props.onClick();
       })
       .catch((error) => {
-        e.preventDefault();
         console.log(error);
       });
   };
