@@ -34,6 +34,11 @@
 .markerHead {
   display: flex;
   overflow: hidden;
+  z-index: 100;
+}
+
+.markerSymbol {
+  position: absolute;
 }
 
 .markerInfo {
@@ -48,30 +53,28 @@
   display: flex;
   flex-direction: column;
   position: absolute;
-  z-index: 10;
   right: -15vw;
   bottom: -3vh;
   overflow: auto;
 }
 
-/* .markerInfo:hover {
+.markerInfo:hover {
+  color: rgb(44, 39, 12);
+  border: 3px solid rgb(187, 183, 163);
   overflow: hidden;
-  background-color: rgb(227, 236, 205);
-  width: 25vw;
-  height: 20vh;
+  background-color: rgb(255, 253, 244);
+  width: 25vmax;
+  height: 20vmax;
   border-radius: 5px;
   padding: 3px;
   display: flex;
-  flex-direction: relative;
+  flex-direction: column;
   position: absolute;
-  z-index: 10;
-} */
-
-.markerSymbol {
-  position: absolute;
-  z-index: -1;
+  z-index: 100 !important;
+  right: -15vw;
+  bottom: -3vh;
+  overflow: auto;
 }
-
 .markerBottom {
   display: flex;
   flex-direction: column;
@@ -80,6 +83,7 @@
   bottom: 3px;
   right: 5%;
   align-items: center;
+  z-index: 100;
 }
 
 .component {
@@ -214,15 +218,17 @@ p {
 }
 
 .toggle {
+  position: relative;
   display: inline-block;
-  border-radius: 10px;
+  border-radius: 8px;
   transition: background-color 1s, color 1s;
   background-color: darkgoldenrod;
   color: rgb(241, 235, 235);
   text-align: center;
   max-width: 100%;
-  padding-left: 1vh;
-  padding-right: 1vh;
+  margin: 3px;
+  padding: 1vh;
+  z-index: 101;
 }
 
 .switch {
@@ -237,13 +243,16 @@ p {
 }
 
 input:checked + .toggle {
+  position: relative;
   display: inline-block;
   transition: background-color 1s, color 1s;
   border-radius: 10px;
   background-color: rgb(86, 88, 92);
   color: rgb(68, 63, 63);
   text-align: center;
+  margin: 3px;
   max-width: 100%;
   padding-left: 1vh;
   padding-right: 1vh;
+  z-index: 101;
 }

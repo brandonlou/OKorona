@@ -9,7 +9,7 @@ export default class Mark extends React.Component {
       name: this.props.name,
       lat: this.props.lat,
       lon: this.props.lon,
-      id: this.props.key,
+      id: this.props.id,
       type: this.props.type,
       link:
         "https://google.com/maps/search/" +
@@ -25,7 +25,6 @@ export default class Mark extends React.Component {
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
     this.handleClick = this.handleClick.bind(this);
   }
-  componentDidMount() {}
   handleMouseEnter() {
     this.setState({
       showInfo: true,
@@ -78,6 +77,21 @@ export default class Mark extends React.Component {
   render() {
     return (
       <Marker latitude={this.state.lat} longitude={this.state.lon}>
+        <div className="markerSymbol" onMouseEnter={this.handleMouseEnter}>
+          <svg
+            className="bi bi-geo-alt"
+            width="2em"
+            height="2em"
+            viewBox="0 0 16 16"
+            fill={this.state.showInfo ? "rgb(187, 183, 163)" : "red"}
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fillRule="evenodd"
+              d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"
+            />
+          </svg>
+        </div>
         {this.state.showInfo ? (
           <div className="markerInfo">
             <div className="markerHead">
@@ -103,10 +117,11 @@ export default class Mark extends React.Component {
               Facility Type:{" "}
               {this.state.type
                 .replace("_", " ")
-                .replace(/(?:\s(.))|(?:^(.))/g, (c) => {
-                  console.log(c);
-                  return c.charAt(0).toUpperCase();
-                })}
+                .replace(/(?:\s(.))|(?:^(.))/g, (c) =>
+                  c.length === 1
+                    ? c.charAt(0).toUpperCase()
+                    : " " + c.charAt(1).toUpperCase()
+                )}
             </div>
             <div>
               <a
@@ -152,21 +167,6 @@ export default class Mark extends React.Component {
         ) : (
           <div></div>
         )}
-        <div className="markerSymbol" onMouseEnter={this.handleMouseEnter}>
-          <svg
-            className="bi bi-geo-alt"
-            width="2em"
-            height="2em"
-            viewBox="0 0 16 16"
-            fill={this.state.showInfo ? "rgb(187, 183, 163)" : "red"}
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"
-            />
-          </svg>
-        </div>
       </Marker>
     );
   }
