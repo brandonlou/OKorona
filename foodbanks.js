@@ -1,43 +1,74 @@
-// To get website HTML.
+// To get website source.
 const axios = require('axios');
 
-// To parse HTML.
-const $ = require('cheerio');
+// To parse HTML and XML.
+const cheerio = require('cheerio');
 
 // First source.
-let alphaScrape = (html) => {
+// const alphaScrape = (html) => {
+//     let listOfFoodbanks = [];
+//     $('table tbody tr', html).each((i, elem) => {
+//         const name = $('span[itemprop=name]', elem).text();
+//         const address = $('div[itemprop=address]', elem).text();
+//         const location = {
+//             "name": name,
+//             "address": address
+//         }
+//         listOfFoodbanks.push(location);
+//     });
+//     return listOfFoodbanks;
+// }
 
+// Second source.
+const betaScrape = (html) => {
     let listOfFoodbanks = [];
-    
-    $('table tbody tr', html).each((i, elem) => {
-        const name = $('span[itemprop=name]', elem).text();
-        const address = $('div[itemprop=address]', elem).text();
+
+    for(const e of html) {
+        const name = e.name;
+        const address = e.street_address + " " + e.city + " " + e.state + " " + e.zip_code;
+        const lon = parseFloat(e.longitude);
+        const lat = parseFloat(e.latitude);
+
         const location = {
-            "name": name,
-            "address": address
-        }
+            name: name,
+            type: "foodbank",
+            address: address,
+            location: {
+                type: "Point",
+                coordinates: [lon, lat]
+            },
+            votes: 0
+        };
+
         listOfFoodbanks.push(location);
-    });
+    }
 
     return listOfFoodbanks;
 }
 
-// Second source.
-let betaScrape = (html) => {
+const gammaScrape = (html) => {
 
     let listOfFoodbanks = [];
+    let $ = cheerio.load(html, { xmlMode: true });
 
-    const name = $('OrganizationID', html).next().text();
-    const address = $('MailAddress Address1', html).text() + " " +
-                    $('MailAddress City', html).text() + " " +
-                    $('MailAddress State', html).text() + " " +
-                    $('MailAddress Zip', html).text();
-
-    const location = {
-        "name": name,
-        "address": address
-    }
-    listOfFoodbanks.push(location);
+    $('Organization OrganizationID').each((i, elem) => {
+        const name = $(elem).next().text();
+        const addressField = $(elem).next().next();
+        const address = $('Address1', addressField).text() + " " + $('City', addressField).text() + " " + $('State', addressField).text() + " " + $('Zip', addressField).text();
+        const lon = $('Longitude', addressField).text();
+        const lat = $('Latitude', addressField).text();
+        const location = {
+            name: name,
+            type: "foodbank",
+            address: address,
+            location: {
+                type: "Point",
+                coordinates: [parseFloat(lon), parseFloat(lat)]
+            },
+            votes: 0
+        }
+        listOfFoodbanks.push(location);
+    });
 
     return listOfFoodbanks;
 }
@@ -46,42 +77,31 @@ const foodbanks = {};
 
 // For each source, get its HTML. Then pass the HTML to its corresponding
 // scraping function.
-foodbanks.getData = async (zipcode) => {
+foodbanks.getData = async () => {
 
-    const alpha = "https://www.foodbanks.net/search.php?q=" + zipcode;
-    const beta = "https://ws2.feedingamerica.org/fawebservice.asmx/GetOrganizationsByZip?zip=" + zipcode;
+    // const alpha = "https://www.foodbanks.net/search.php?q=" + zipcode;
+    const beta = "https://controllerdata.lacity.org/resource/v2mg-qsxf.json";
+    const gamma = "https://ws2.feedingamerica.org/fawebservice.asmx/GetAllOrganizations";
 
     const sources = {
-        [alpha]: alphaScrape,
-        [beta]: betaScrape
+        // [alpha]: alphaScrape,
+        [beta]: betaScrape,
+        [gamma]: gammaScrape
     };
 
-    let nearbyFoodbanks = [];
+    let allFoodbanks = [];
 
     for(const key in sources) {
-        const response = await axios.get(key);
-        const locations = sources[key](response.data);
-        for(let i = 0; i < locations.length; i++) {
-            const place = locations[i];
-
-            // Get coords from place.address here.
-
-            const placeData = {
-                type: "foodbank",
-                name: place.name,
-                address: place.address
-            }
-
-            // Ignore if empty location. This is because of faulty scraping.
-            if(placeData.name == "") {
-                continue;
-            }
-
-            nearbyFoodbanks.push(placeData);
+        const response = await axios.get(key); // Get HTML from each source.
+        const locations = await sources[key](response.data); // Pass the HTML to its scraping function.
+        for(const e of locations) { // Combine all information into one list.
+            allFoodbanks.push(e);
         }
     }
 
-    return nearbyFoodbanks;
+    console.log(allFoodbanks);
+    return allFoodbanks;
+
 }
 
 module.exports = foodbanks;

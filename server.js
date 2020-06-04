@@ -59,14 +59,14 @@ app.post('/api/add_resource', async (req, res) => {
     // Check each field has a value.
     if(!name || !type || !address) {
         console.log("Received bad data.");
-        res.send("Error");
+        res.status(404).send("Received bad data.");
 
     } else {
         // Package data to be inserted into MongoDB.
         const coords = await common.convertAddressToCoords(address);
         console.log(coords);
         if(!coords) {
-            res.send("Error");
+            res.status(404).send("Not a valid address.");
             return;
         }
         const resource = {
@@ -81,7 +81,7 @@ app.post('/api/add_resource', async (req, res) => {
         }
         const data = [resource];
         addResourceMongo(data);
-        res.send("Success!");
+        res.status(200).send("Success!");
     }
 });
 
@@ -121,9 +121,7 @@ app.listen(PORT, () => console.log(`Server has started on port ${PORT}.`));
 stdin.addListener("data", async (input) => {
     const command = input.toString().trim();
     if(command === "f") {
-        updateCovidTestingData();
-        // const hi = await getResourcesMongo([-122.522060, 37.807606], [-122.356954, 37.707973]);
-        // console.log(hi);
+        // updateFoodbankData();
     }
 });
 
