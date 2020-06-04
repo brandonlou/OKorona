@@ -471,8 +471,8 @@ export default class App extends React.Component {
                         theme = "mapbox://styles/mapbox/outdoors-v11";
                         break;
                       default:
-                        theme =
-                          "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
+                        // theme = "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
+                        theme = "mapbox://styles/mapbox/navigation-guidance-day-v4";
                     }
 
                     if (this.map) {
@@ -572,7 +572,8 @@ export default class App extends React.Component {
               minZoom={8}
               mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
               onViewportChange={this._onViewportChange}
-              mapStyle="mapbox://styles/ashleytz/ckb07cp3006nd1imm9qg9ug18"
+              // mapStyle="mapbox://styles/ashleytz/ckb07cp3006nd1imm9qg9ug18"
+              mapStyle="mapbox://styles/mapbox/navigation-guidance-day-v4"
               ref={this.mapRef}
             >
               <div
