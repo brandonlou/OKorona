@@ -44,6 +44,7 @@
 
 .markerInfo {
   color: rgb(44, 39, 12);
+  /*rgb(255, 253, 244)*/
   border: 3px solid rgb(187, 183, 163);
   overflow: hidden;
   background-color: rgb(255, 253, 244);
@@ -58,7 +59,6 @@
   bottom: -3vh;
   overflow: auto;
 }
-
 
 .markerBottom {
   display: flex;
@@ -210,21 +210,6 @@ p {
   width: inherit;
 }
 
-.toggle {
-  position: relative;
-  display: inline-block;
-  border-radius: 8px;
-  transition: background-color 1s, color 1s;
-  background-color: darkgoldenrod;
-  color: rgb(241, 235, 235);
-  text-align: center;
-  max-width: 100%;
-  margin: 3px;
-  padding: 1vh;
-  z-index: 101;
-  cursor: pointer;
-}
-
 .switch {
   position: relative;
   display: inline-block;
@@ -235,14 +220,86 @@ p {
   width: 0;
   height: 0;
 }
+.toggle {
+  position: relative;
+  display: inline-block;
+  border-radius: 8px;
+  transition: background-color 1s, color 1s;
+  background-color: rgb(62, 226, 98);
+  color: rgb(241, 235, 235);
+  text-align: center;
+  max-width: 100%;
+  margin: 3px;
+  padding: 1vh;
+  z-index: 101;
+  cursor: pointer;
+}
 
 input:checked + .toggle {
   position: relative;
   display: inline-block;
   transition: background-color 1s, color 1s;
+  background-color: rgb(67, 77, 77);
   border-radius: 10px;
-  background-color: rgb(86, 88, 92);
-  color: rgb(68, 63, 63);
+  color: rgb(122, 117, 117);
+  text-align: center;
+  margin: 3px;
+  max-width: 100%;
+  padding-left: 1vh;
+  padding-right: 1vh;
+  z-index: 101;
+}
+
+.toggle2 {
+  position: relative;
+  display: inline-block;
+  border-radius: 8px;
+  transition: background-color 1s, color 1s;
+  background-color: rgb(247, 129, 50);
+  color: rgb(241, 235, 235);
+  text-align: center;
+  max-width: 100%;
+  margin: 3px;
+  padding: 1vh;
+  z-index: 101;
+}
+
+input:checked + .toggle2 {
+  position: relative;
+  display: inline-block;
+  transition: background-color 1s, color 1s;
+  background-color: rgb(67, 77, 77);
+  border-radius: 10px;
+  color: rgb(122, 117, 117);
+  text-align: center;
+  margin: 3px;
+  max-width: 100%;
+  padding-left: 1vh;
+  padding-right: 1vh;
+  z-index: 101;
+}
+
+.toggle3 {
+  position: relative;
+  display: inline-block;
+  border-radius: 8px;
+  transition: background-color 1s, color 1s;
+  background-color: rgb(236, 59, 59);
+  color: rgb(241, 235, 235);
+  text-align: center;
+  max-width: 100%;
+  margin: 3px;
+  padding: 1vh;
+  z-index: 101;
+}
+
+input:checked + .toggle3 {
+  position: relative;
+  display: inline-block;
+  transition: background-color 1s, color 1s;
+  background-color: rgb(67, 77, 77);
+  border-radius: 10px;
+  color: rgb(122, 117, 117);
   text-align: center;
   margin: 3px;
   max-width: 100%;

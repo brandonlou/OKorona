@@ -6,7 +6,6 @@ const navigateBaseUrl = "https://www.google.com/maps/dir/";
 export default class Mark extends React.Component {
   constructor(props) {
     super(props);
-    console.log(this.props);
     this.state = {
       address: this.props.address,
       name: this.props.name,
@@ -16,6 +15,7 @@ export default class Mark extends React.Component {
       type: this.props.type,
       showInfo: false,
       votes: this.props.votes,
+      color: this.props.color,
       user: localStorage.getItem("userID"),
     };
     this.handleMarkerClick = this.handleMarkerClick.bind(this);
@@ -35,7 +35,9 @@ export default class Mark extends React.Component {
   }
 
   handleNavigate() {
-    window.open(navigateBaseUrl + "/" + this.state.lat + "," + this.state.lon + "/@?hl=en");
+    window.open(
+      navigateBaseUrl + "/" + this.state.lat + "," + this.state.lon + "/@?hl=en"
+    );
   }
 
   increaseValue(value) {
@@ -84,7 +86,7 @@ export default class Mark extends React.Component {
             width="2em"
             height="2em"
             viewBox="0 0 16 16"
-            fill={this.state.showInfo ? "rgb(187, 183, 163)" : "red"}
+            fill={this.state.showInfo ? "rgb(187, 183, 163)" : this.state.color}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -126,7 +128,11 @@ export default class Mark extends React.Component {
                 )}
             </div>
             <div>
-              <button className="button" id="navigate" onClick={this.handleNavigate}>
+              <button
+                className="button"
+                id="navigate"
+                onClick={this.handleNavigate}
+              >
                 Navigate (Google Maps)
               </button>
             </div>
