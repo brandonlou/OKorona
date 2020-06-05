@@ -108,6 +108,7 @@ export default class Mark extends React.Component {
                 viewBox="0 0 16 16"
                 fill="currentColor"
                 xmlns="http://www.w3.org/2000/svg"
+                cursor="pointer"
               >
                 <path
                   fillRule="evenodd"

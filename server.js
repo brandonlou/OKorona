@@ -6,6 +6,7 @@ const common = require('./common.js');
 const stores = require('./stores.js');
 const mongo = require('mongodb').MongoClient;
 const stdin = process.openStdin();
+const ObjectId = require('mongodb').ObjectId;
 
 const app = express();
 app.use(express.json());
@@ -86,19 +87,75 @@ app.post('/api/add_resource', async (req, res) => {
     }
 });
 
-// Handles thumbs up and down.
-app.post('/api/vote', (req, res) => {
+// Handles up voting.
+app.post('/api/upvote', async (req, res) => {
     const content = req.body;
-    const resourceID = content.id;
-    const value = content.value;
+    const resourceID = content.resourceID;
+    const userID = content.userID;
 
-    // Check resource ID is not null and value is a number.
-    if(!resourceID || isNaN(value)) {
+    // Check resourceID and userID are not null.
+    if(!resourceID || !userID) {
         console.log("Received bad data");
-        res.send("Error!");
+        res.status(404).send("resourceID or userID invalid.");
     } else {
-        updateResourceMongo(resourceID, value);
-        res.send("Success!");
+        const userVotes = await findVotesMongo(userID);
+        // Make sure values are not null.
+        if(!userVotes.downvotes) userVotes.downvotes = [];
+        if(!userVotes.upvotes) userVotes.upvotes = [];
+
+        // Remove resource from downvote list if in downvote list.
+        if(userVotes.downvotes.includes(resourceID)) {
+            userVotes.downvotes.splice(userVotes.downvotes.indexOf(resourceID), 1);
+        
+        // Do nothing if resource already upvoted by user.
+        } else if(userVotes.upvotes.includes(resourceID)) {
+            res.status(404).send("Resource already upvoted by user!");
+            return;
+
+        // Otherwise, add to upvote list.
+        } else {
+           userVotes.upvotes.push(resourceID);
+        }
+
+        await updateUserVotes(userID, userVotes);
+        await updateResourceVotes(resourceID, -1);
+        res.status(200).send("Upvote Success!");
+    }
+});
+
+// Handles down voting.
+app.post('/api/downvote', async (req, res) => {
+    const content = req.body;
+    const resourceID = content.resourceID;
+    const userID = content.userID;
+
+    // Check resourceID and userID are not null.
+    if(!resourceID || !userID) {
+        console.log("Received bad data");
+        res.status(404).send("resourceID or userID invalid.");
+    } else {
+        const userVotes = await findVotesMongo(userID);
+        // Make sure values are not null.
+        if(!userVotes.downvotes) userVotes.downvotes = [];
+        if(!userVotes.upvotes) userVotes.upvotes = [];
+
+        // Remove resource from upvote list if in upvote list.
+        if(userVotes.upvotes.includes(resourceID)) {
+            userVotes.upvotes.splice(userVotes.upvotes.indexOf(resourceID), 1);
+        
+        // Do nothing if resource already upvoted by user.
+        } else if(userVotes.downvotes.includes(resourceID)) {
+            res.status(404).send("Resource already downvoted by user!");
+            return;
+
+        // Otherwise, add to upvote list.
+        } else {
+           userVotes.downvotes.push(resourceID);
+        }
+
+        await updateUserVotes(userID, userVotes);
+        await updateResourceVotes(resourceID, 1);
+        res.status(200).send("Downvote Success!");
     }
 });
 
@@ -122,11 +179,85 @@ app.listen(PORT, () => console.log(`Server has started on port ${PORT}.`));
 stdin.addListener("data", async (input) => {
     const command = input.toString().trim();
     if(command === "f") {
-        // updateStoreData();
+        findVotesMongo("5ed6bc327c213e044cc115e3");
     }
 });
 
 const mongoURL = "mongodb://nodeClient:cs97isgreat@ds253388.mlab.com:53388/heroku_bvrv3598";
+
+const updateResourceVotes = async (resourceID, amt) => {
+    const client = await mongo.connect(mongoURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }).catch((err) =>{
+        console.log(err);
+        return;
+    });
+    try {
+        const db = client.db("heroku_bvrv3598");
+        const collection = db.collection("Resources");
+        const query = { "_id": new ObjectId(resourceID)};
+        const newValues = { $inc: {"votes": amt}};
+        const res = await collection.updateOne(query, newValues);
+        console.log("Update resource vote successful!");
+    } catch(err) {
+        console.log(err);
+        return;
+    } finally {
+        client.close();
+    }
+};
+
+const updateUserVotes = async (userID, votes) => {
+    const client = await mongo.connect(mongoURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }).catch((err) =>{
+        console.log(err);
+        return;
+    });
+    try {
+        const db = client.db("heroku_bvrv3598");
+        const collection = db.collection("Users");
+        const query = { "_id": new ObjectId(userID)};
+        const newValues = {$set: {"upvotes": votes.upvotes, "downvotes": votes.downvotes }};
+        const res = await collection.updateOne(query, newValues);
+        console.log("Update user votes successful!");
+    } catch(err) {
+        console.log(err);
+        return;
+    } finally {
+        client.close();
+    }
+};
+
+const findVotesMongo = async (userID) => {
+    const client = await mongo.connect(mongoURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }).catch((err) =>{
+        console.log(err);
+        return null;
+    });
+    let votes = {};
+    const id = new ObjectId(userID);
+    try {
+        const db = client.db("heroku_bvrv3598");
+        const collection = db.collection("Users");
+        const query = { "_id": id};
+        const res = await collection.findOne(query);
+        if(res) {
+            votes.upvotes = res.upvotes;
+            votes.downvotes = res.downvotes;
+        }
+    } catch(err) {
+        console.log(err);
+        return null;
+    } finally {
+        client.close();
+    }
+    return votes;
+};
 
 const findUserMongo = async (username, password) => {
     
@@ -183,30 +314,6 @@ const addResourceMongo = async (data) => {
     }
 
 }
-
-// Updates number of upvotes by resource ID. num must be a number.
-const updateResourceMongo = (id, num) => {
-    mongo.connect(mongoURL, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    }, (err, client) => {
-        if(err) {
-            console.error(err);
-            return;
-        }
-        const db = client.db("heroku_bvrv3598");
-        const query = { "_id" : ObjectId(id) };
-        const newValue = { $set: {votes: num} }
-        db.collection("Resources").updateOne(query, newValue, (err, result) => {
-            if(err) {
-                console.error(err);
-                return;
-            }
-            client.close();
-            console.log("Successfully updated database.");
-        });
-    });
-};
 
 const getResourcesMongo = async (topRight, botLeft) => {
     const client = await mongo.connect(mongoURL, {
