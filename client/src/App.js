@@ -615,7 +615,7 @@ export default class App extends React.Component {
                   <span className="toggle">Stores</span>
                 </label>
               </div>
-              {(this.state.showFoodbanks === true) & this.foodbanks ? (
+              {(this.state.showFoodbanks === true) && this.foodbanks ? (
                 this.foodbanks.map((pt) => (
                   <Mark
                     // click={(i) => this.bringToTop(i)}
