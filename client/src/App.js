@@ -56,6 +56,7 @@ export default class App extends React.Component {
     this.nav = null;
     this.research = false;
     this.map = null;
+    this.markRefs = [];
     this.mapRef = React.createRef();
     this.options = {};
     this.onViewportChange = this._onViewportChange.bind(this);
@@ -101,15 +102,14 @@ export default class App extends React.Component {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          trLon: bounds._ne.lng + 2,
-          trLat: bounds._ne.lat + 2,
-          blLon: bounds._sw.lng - 2,
-          blLat: bounds._sw.lat - 2,
+          trLon: bounds._ne.lng + 0.5,
+          trLat: bounds._ne.lat + 0.5,
+          blLon: bounds._sw.lng - 0.5,
+          blLat: bounds._sw.lat - 0.5,
         }),
       })
         .then((res) => res.json())
         .then((json) => {
-          console.log(json);
           for (const obj of json) {
             let add = true;
             switch (obj.type) {
@@ -119,7 +119,10 @@ export default class App extends React.Component {
                     add = false;
                   }
                 }
-                if (add) this.testing.push(obj);
+                if (add) {
+                  this.markRefs.push(React.createRef());
+                  this.testing.push(obj);
+                }
                 break;
               case "foodbank":
                 for (const elem of this.foodbanks) {
@@ -127,7 +130,10 @@ export default class App extends React.Component {
                     add = false;
                   }
                 }
-                if (add) this.foodbanks.push(obj);
+                if (add) {
+                  this.markRefs.push(React.createRef());
+                  this.foodbanks.push(obj);
+                }
                 break;
               case "store":
                 for (const elem of this.stores) {
@@ -135,10 +141,13 @@ export default class App extends React.Component {
                     add = false;
                   }
                 }
-                if (add) this.stores.push(obj);
+                if (add) {
+                  this.markRefs.push(React.createRef());
+                  this.stores.push(obj);
+                }
                 break;
-                default:
-                  break;
+              default:
+                break;
             }
           }
         })
@@ -269,7 +278,9 @@ export default class App extends React.Component {
           autoComp: results,
         });
       })
-      .catch((error) => {});
+      .catch((error) => {
+        return console.log(error);
+      });
     this.reSearch(false);
     this.clearResults(false);
   }
@@ -338,6 +349,7 @@ export default class App extends React.Component {
   // }
 
   render() {
+    let count = 0;
     return (
       <div className="App">
         {this.state.showSign ? (
@@ -428,7 +440,6 @@ export default class App extends React.Component {
               >
                 <select
                   onChange={(e) => {
-                    console.log(e.target.value);
                     let theme = "";
                     switch (e.target.value) {
                       case "Decimal":
@@ -472,7 +483,8 @@ export default class App extends React.Component {
                         break;
                       default:
                         // theme = "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
-                        theme = "mapbox://styles/mapbox/navigation-guidance-day-v4";
+                        theme =
+                          "mapbox://styles/mapbox/navigation-guidance-day-v4";
                     }
 
                     if (this.map) {
@@ -481,12 +493,12 @@ export default class App extends React.Component {
                     }
                   }}
                 >
+                  <option value="Day">Day</option>
                   <option value="Frank">Frank</option>
                   <option value="Decimal">Decimal</option>
                   <option value="Standard">Standard</option>
                   <option value="Blueprint">Blueprint</option>
                   <option value="Night">Night</option>
-                  <option value="Day">Day</option>
                   <option value="Satellite Streets">Satellite Streets</option>
                   <option value="Satellite">Satellite</option>
                   <option value="Dark">Dark</option>
@@ -572,7 +584,6 @@ export default class App extends React.Component {
               minZoom={8}
               mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
               onViewportChange={this._onViewportChange}
-              // mapStyle="mapbox://styles/ashleytz/ckb07cp3006nd1imm9qg9ug18"
               mapStyle="mapbox://styles/mapbox/navigation-guidance-day-v4"
               ref={this.mapRef}
             >
@@ -590,7 +601,7 @@ export default class App extends React.Component {
                       });
                     }}
                   />
-                  <span className="toggle">Testing Centers</span>
+                  <span className="toggle3">Testing Centers</span>
                 </label>
                 <label className="switch">
                   <input
@@ -601,7 +612,7 @@ export default class App extends React.Component {
                       })
                     }
                   />
-                  <span className="toggle">Foodbanks</span>
+                  <span className="toggle2">Foodbanks</span>
                 </label>
                 <label className="switch">
                   <input
@@ -615,53 +626,63 @@ export default class App extends React.Component {
                   <span className="toggle">Stores</span>
                 </label>
               </div>
-              {(this.state.showFoodbanks === true) & this.foodbanks ? (
-                this.foodbanks.map((pt) => (
-                  <Mark
-                    // click={(i) => this.bringToTop(i)}
-                    //send in upvote,downvote,addressname, and
-                    key={pt["_id"]}
-                    id={pt["_id"]}
-                    lat={pt["location"]["coordinates"][1]}
-                    lon={pt["location"]["coordinates"][0]}
-                    address={pt["address"]}
-                    type={pt["type"]}
-                    name={pt["name"]}
-                    votes={pt["votes"]}
-                  />
-                ))
+              {this.state.showFoodbanks === true && this.foodbanks ? (
+                this.foodbanks.map((pt) => {
+                  return (
+                    <Mark
+                      ref={this.markRefs[count]}
+                      key={pt["_id"]}
+                      id={count++}
+                      lat={pt["location"]["coordinates"][1]}
+                      lon={pt["location"]["coordinates"][0]}
+                      address={pt["address"]}
+                      type={pt["type"]}
+                      name={pt["name"]}
+                      votes={pt["votes"]}
+                      color="rgb(247, 129, 50)"
+                    />
+                  );
+                })
               ) : (
                 <div></div>
               )}
               {this.state.showTest === true && this.testing ? (
-                this.testing.map((pt) => (
-                  <Mark
-                    key={pt["_id"]}
-                    id={pt["_id"]}
-                    lat={pt["location"]["coordinates"][1]}
-                    lon={pt["location"]["coordinates"][0]}
-                    address={pt["address"]}
-                    type={pt["type"]}
-                    name={pt["name"]}
-                    votes={pt["votes"]}
-                  />
-                ))
+                this.testing.map((pt) => {
+                  return (
+                    <Mark
+                      ref={this.markRefs[count]}
+                      key={pt["_id"]}
+                      id={count++}
+                      lat={pt["location"]["coordinates"][1]}
+                      lon={pt["location"]["coordinates"][0]}
+                      address={pt["address"]}
+                      type={pt["type"]}
+                      name={pt["name"]}
+                      votes={pt["votes"]}
+                      color="rgb(236, 59, 59)"
+                    />
+                  );
+                })
               ) : (
                 <div></div>
               )}
               {this.state.showStore === true && this.stores ? (
-                this.stores.map((pt) => (
-                  <Mark
-                    key={pt["_id"]}
-                    id={pt["_id"]}
-                    lat={pt["location"]["coordinates"][1]}
-                    lon={pt["location"]["coordinates"][0]}
-                    address={pt["address"]}
-                    type={pt["type"]}
-                    name={pt["name"]}
-                    votes={pt["votes"]}
-                  />
-                ))
+                this.stores.map((pt) => {
+                  return (
+                    <Mark
+                      ref={this.markRefs[count]}
+                      key={pt["_id"]}
+                      id={count++}
+                      lat={pt["location"]["coordinates"][1]}
+                      lon={pt["location"]["coordinates"][0]}
+                      address={pt["address"]}
+                      type={pt["type"]}
+                      name={pt["name"]}
+                      votes={pt["votes"]}
+                      color="rgb(62, 226, 98)"
+                    />
+                  );
+                })
               ) : (
                 <div></div>
               )}
