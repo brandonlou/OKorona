@@ -3,6 +3,7 @@ const path = require('path');
 const foodbanks = require('./foodbanks');
 const covidtests = require('./covidtests');
 const common = require('./common.js');
+const stores = require('./stores.js');
 const mongo = require('mongodb').MongoClient;
 const stdin = process.openStdin();
 
@@ -121,7 +122,7 @@ app.listen(PORT, () => console.log(`Server has started on port ${PORT}.`));
 stdin.addListener("data", async (input) => {
     const command = input.toString().trim();
     if(command === "f") {
-        // updateFoodbankData();
+        // updateStoreData();
     }
 });
 
@@ -247,4 +248,10 @@ const updateFoodbankData = async() => {
     const data = await foodbanks.getData();
     await addResourceMongo(data);
     console.log("Update foodbank data success!");
+}
+
+const updateStoreData = async() => {
+    const data = await stores.getData();
+    await addResourceMongo(data);
+    console.log("Update store data success!");
 }
