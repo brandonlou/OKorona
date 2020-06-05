@@ -27,6 +27,8 @@ export default class App extends React.Component {
       autoComp: {},
       showForm: false,
       showSign: false,
+      update: false,
+      bounds: null,
       // userLoggedIn: localStorage.getItem("LoggedIn") ? true : false,
     };
     this.theme = [
@@ -36,19 +38,7 @@ export default class App extends React.Component {
         info: "pink",
       },
     ];
-    this.testing = [
-      {
-        _id: "1",
-        address: "1998 Market Street San Francisco CA 914102",
-        location: {
-          coordinates: [-121.97802, 37.77993],
-          type: "Point",
-        },
-        name: "Castro Urgent Care San Francisco - Carbon Health",
-        type: "testing_site",
-        votes: 0,
-      },
-    ];
+    this.testing = [];
     this.change = false;
     this.origin = [];
     this.stores = [];
@@ -66,6 +56,7 @@ export default class App extends React.Component {
     this.reSearch = this.reSearch.bind(this);
     this.userLoc = this.userLoc.bind(this);
     this.getLocations = this.getLocations.bind(this);
+    this.render = this.render.bind(this);
     // this.bringToTop = this.bringToTop.bind(this);
   }
 
@@ -85,16 +76,18 @@ export default class App extends React.Component {
 
   getLocations() {
     const bounds = this.map.getMap().getBounds();
-    const halfLat = (bounds._ne.latitude - bounds._sw.latitude) / 2;
-    const halfLon = (bounds._ne.longitude = bounds._sw.longitude) / 2;
+    const halfLat = (bounds._ne.lat - bounds._sw.lat) / 2;
+    const halfLon = (bounds._ne.lng - bounds._sw.lng) / 2;
     const maxRad = Math.sqrt(
       Math.pow(halfLat + 1, 2) + Math.pow(halfLon + 1, 2)
     );
     const radius = Math.sqrt(
-      Math.pow(this.state.viewport.latitude - this.origin.latitude, 2) +
-        Math.pow(this.state.viewport.longitude - this.origin.longitude, 2)
+      Math.pow(this.state.viewport.latitude - this.origin[0], 2) +
+        Math.pow(this.state.viewport.longitude - this.origin[1], 2)
     );
-    if ((radius > maxRad - 0.4) | this.change) {
+    console.log(maxRad);
+    console.log(radius);
+    if ((radius > maxRad - 0.3) | this.change) {
       fetch("./api/get_resource", {
         method: "POST",
         headers: {
@@ -102,14 +95,15 @@ export default class App extends React.Component {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          trLon: bounds._ne.lng + 0.5,
-          trLat: bounds._ne.lat + 0.5,
-          blLon: bounds._sw.lng - 0.5,
-          blLat: bounds._sw.lat - 0.5,
+          trLon: bounds._ne.lng + 1,
+          trLat: bounds._ne.lat + 1,
+          blLon: bounds._sw.lng - 1,
+          blLat: bounds._sw.lat - 1,
         }),
       })
         .then((res) => res.json())
         .then((json) => {
+          console.log(json);
           for (const obj of json) {
             let add = true;
             switch (obj.type) {
@@ -157,6 +151,7 @@ export default class App extends React.Component {
         this.state.viewport.longitude,
       ];
       this.change = false;
+      this.render();
     }
   }
 
@@ -173,6 +168,7 @@ export default class App extends React.Component {
     });
     this.change = true;
     this.origin = [this.state.viewport.latitude, this.state.viewport.longitude];
+    this.getLocations();
   }
   componentDidMount() {
     this.map = this.mapRef.current;
@@ -313,6 +309,13 @@ export default class App extends React.Component {
     }
   }
 
+  singleMarker(i) {
+    for (let c = 0; c < this.markRefs.length(); c++) {
+      console.log(this.markRefs[c].current);
+      if (c !== i) this.markRefs[c].current.handleMarkerClick();
+    }
+  }
+
   componentWillUpdate() {
     // if (this.zips.length > 0) {
     //   for (const zip of this.zips) {
@@ -350,6 +353,17 @@ export default class App extends React.Component {
 
   render() {
     let count = 0;
+    let maxLon = 0;
+    let maxLat = 0;
+    let minLon = 0;
+    let minLat = 0;
+    if (this.map) {
+      const bounds = this.map.getMap().getBounds();
+      maxLon = bounds._ne.lng + 0.1;
+      maxLat = bounds._ne.lat + 0.1;
+      minLon = bounds._sw.lng - 0.1;
+      minLat = bounds._sw.lat - 0.1;
+    }
     return (
       <div className="App">
         {this.state.showSign ? (
@@ -581,7 +595,7 @@ export default class App extends React.Component {
               width="100%"
               height="100%"
               maxZoom={20}
-              minZoom={8}
+              minZoom={12}
               mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
               onViewportChange={this._onViewportChange}
               mapStyle="mapbox://styles/mapbox/navigation-guidance-day-v4"
@@ -628,60 +642,87 @@ export default class App extends React.Component {
               </div>
               {this.state.showFoodbanks === true && this.foodbanks ? (
                 this.foodbanks.map((pt) => {
-                  return (
-                    <Mark
-                      ref={this.markRefs[count]}
-                      key={pt["_id"]}
-                      id={count++}
-                      lat={pt["location"]["coordinates"][1]}
-                      lon={pt["location"]["coordinates"][0]}
-                      address={pt["address"]}
-                      type={pt["type"]}
-                      name={pt["name"]}
-                      votes={pt["votes"]}
-                      color="rgb(247, 129, 50)"
-                    />
-                  );
+                  const lat = pt["location"]["coordinates"][1];
+                  const lon = pt["location"]["coordinates"][0];
+                  if (
+                    minLat < lat &&
+                    lat < maxLat &&
+                    minLon < lon &&
+                    lon < maxLon
+                  )
+                    return (
+                      <Mark
+                        ref={this.markRefs[count]}
+                        key={pt["_id"]}
+                        id={pt["_id"]}
+                        markerClick={() => this.singleMarker(count++)}
+                        lat={lat}
+                        lon={lon}
+                        address={pt["address"]}
+                        type={pt["type"]}
+                        name={pt["name"]}
+                        votes={pt["votes"]}
+                        color="rgb(247, 129, 50)"
+                      />
+                    );
                 })
               ) : (
                 <div></div>
               )}
               {this.state.showTest === true && this.testing ? (
                 this.testing.map((pt) => {
-                  return (
-                    <Mark
-                      ref={this.markRefs[count]}
-                      key={pt["_id"]}
-                      id={count++}
-                      lat={pt["location"]["coordinates"][1]}
-                      lon={pt["location"]["coordinates"][0]}
-                      address={pt["address"]}
-                      type={pt["type"]}
-                      name={pt["name"]}
-                      votes={pt["votes"]}
-                      color="rgb(236, 59, 59)"
-                    />
-                  );
+                  const lat = pt["location"]["coordinates"][1];
+                  const lon = pt["location"]["coordinates"][0];
+                  if (
+                    minLat < lat &&
+                    lat < maxLat &&
+                    minLon < lon &&
+                    lon < maxLon
+                  )
+                    return (
+                      <Mark
+                        ref={this.markRefs[count]}
+                        key={pt["_id"]}
+                        id={pt["_id"]}
+                        markerClick={() => this.singleMarker(count++)}
+                        lat={lat}
+                        lon={lon}
+                        address={pt["address"]}
+                        type={pt["type"]}
+                        name={pt["name"]}
+                        votes={pt["votes"]}
+                        color="rgb(236, 59, 59)"
+                      />
+                    );
                 })
               ) : (
                 <div></div>
               )}
               {this.state.showStore === true && this.stores ? (
                 this.stores.map((pt) => {
-                  return (
-                    <Mark
-                      ref={this.markRefs[count]}
-                      key={pt["_id"]}
-                      id={count++}
-                      lat={pt["location"]["coordinates"][1]}
-                      lon={pt["location"]["coordinates"][0]}
-                      address={pt["address"]}
-                      type={pt["type"]}
-                      name={pt["name"]}
-                      votes={pt["votes"]}
-                      color="rgb(62, 226, 98)"
-                    />
-                  );
+                  const lat = pt["location"]["coordinates"][1];
+                  const lon = pt["location"]["coordinates"][0];
+                  if (
+                    minLat < lat &&
+                    lat < maxLat &&
+                    minLon < lon &&
+                    lon < maxLon
+                  )
+                    return (
+                      <Mark
+                        ref={this.markRefs[count]}
+                        key={pt["_id"]}
+                        id={pt["_id"]}
+                        markerClick={() => this.singleMarker(count++)}
+                        lat={lat}
+                        lon={lon}
+                        address={pt["address"]}
+                        type={pt["type"]}
+                        name={pt["name"]}
+                        votes={pt["votes"]}
+                        color="rgb(62, 226, 98)"
+                      />
+                    );
                 })
               ) : (
                 <div></div>
