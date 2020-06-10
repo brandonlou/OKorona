@@ -28,7 +28,6 @@ app.post('/api/get_resource', async (req, res) => {
     const locations = await getResourcesMongo([trLon, trLat], [blLon, blLat]);
     if(locations) {
         res.status(200).json(locations);
-
     } else {
         console.log("No locations");
         res.status(200).json({});
@@ -36,7 +35,33 @@ app.post('/api/get_resource', async (req, res) => {
 
 });
 
-// Handles logging in. Responds with the user ID.
+// Handles user registration.
+app.post('/api/register', async (req, res) => {
+    const content = req.body;
+    if(!content.username || !content.password || !content.email) {
+        console.log("Did not specify username, password, or email.");
+        res.status(404).send("Did not specify username, password, or email.");
+
+    } else {
+        const user = {
+            username: content.username,
+            password: content.password,
+            email: content.email,
+            upvotes: [],
+            downvotes: [],
+            theme: "Day"
+        };
+        const success = await addUserMongo(user);
+        if(success) {
+            res.status(200).send("User registration success!");
+        } else {
+            res.status(404).send("Registration error in MongoDB.")
+        }
+    }
+});
+
+
+// Handles logging in. Responds with the user ID and array of upvotes and dowvotes.
 app.post('/api/login', async (req, res) => {
     const content = req.body;
     const username = content.username;
@@ -315,6 +340,33 @@ const addResourceMongo = async (data) => {
         console.log(err);
     } finally {
         client.close();
+    }
+
+}
+
+// Adds a single user to the Users collection.
+const addUserMongo = async (data) => {
+
+    const client = await mongo.connect(mongoURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }).catch((err) =>{
+        console.log(err);
+        return false;
+    });
+
+    try {
+        const db = client.db("heroku_bvrv3598");
+        const collection = db.collection("Users");
+        await collection.insertOne(data);
+        console.log("Successfully added user into database.");
+        client.close();
+        return true;
+        
+    } catch(err) {
+        console.log(err);
+        client.close();
+        return false;
     }
 
 }
