@@ -155,7 +155,6 @@ export default class Submit extends React.Component {
             style={{
               position: "absolute",
               left: "45%",
-              maxWidth: "10vw",
               bottom: "5%",
             }}
           >

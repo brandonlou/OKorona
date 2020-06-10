@@ -14,9 +14,9 @@ export default class Mark extends React.Component {
       id: this.props.id,
       type: this.props.type,
       showInfo: false,
-      votes: this.props.votes,
       color: this.props.color,
       user: localStorage.getItem("userID"),
+      votes: this.props.votes,
     };
     this.handleMarkerClick = this.handleMarkerClick.bind(this);
     this.handleClick = this.handleClick.bind(this);
@@ -41,38 +41,50 @@ export default class Mark extends React.Component {
   }
 
   increaseValue(value) {
+    const user = localStorage.getItem("userID");
+    const resource = this.state.id;
     switch (value) {
       case "good":
         /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
-        fetch("./api/vote", {
+        fetch("./api/upvote", {
           method: "POST",
-          header: { "Content-type": "application/json" },
-          body: {
-            id: this.state.id,
-            value: 1,
+          headers: {
+            Accept: "application/json",
+            "Content-type": "application/json",
           },
-        });
-        this.setState({
-          good: this.state.good + 1,
-        });
+          body: JSON.stringify({
+            userID: user,
+            resourceID: resource,
+          }),
+        })
+          .then((response) => {
+            if (response.statusText === "OK")
+              this.setState({
+                votes: this.state.votes + 1,
+              });
+          })
+          .catch((error) => console.log(error));
         //fetch(post to database about the upvote)
         break;
       case "bad":
         /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
-        fetch("./api/vote", {
+        fetch("./api/downvote", {
           method: "POST",
-          header: { "Content-type": "application/json" },
-          body: {
-            id: this.state.id,
-            value: -1,
-          },
-        });
-        this.setState({
-          bad: this.state.bad + 1,
-        });
+          headers: { "Content-type": "application/json" },
+          body: JSON.stringify({
+            userID: user,
+            resourceID: resource,
+          }),
+        })
+          .then((response) => {
+            if (response.statusText === "OK")
+              this.setState({
+                votes: this.state.votes + 1,
+              });
+          })
+          .catch((error) => console.log(error));
+
         //fetch(post to database about the upvote)
-        break;
-      default:
         break;
     }
   }
@@ -127,14 +139,19 @@ export default class Mark extends React.Component {
                     : " " + c.charAt(1).toUpperCase()
                 )}
             </div>
-            <div>
-              <button
-                className="button"
-                id="navigate"
-                onClick={this.handleNavigate}
-              >
-                Navigate (Google Maps)
-              </button>
+            <div
+              style={{
+                position: "absolute",
+                width: "auto",
+                maxWidth: "85%",
+                bottom: "0",
+                margin: "8%",
+              }}
+              className="button"
+              id="navigate"
+              onClick={this.handleNavigate}
+            >
+              Navigate (Google Maps)
             </div>
             <div className="markerBottom">
               <svg
@@ -145,8 +162,11 @@ export default class Mark extends React.Component {
                 fill="currentColor"
                 xmlns="http://www.w3.org/2000/svg"
                 onClick={() => {
-                  if (localStorage.getItem("userID") !== null)
-                    this.increaseValue("bad");
+                  if (localStorage.getItem("userID") !== null) {
+                    this.increaseValue("good");
+                  } else {
+                    this.props.signUp();
+                  }
                 }}
               >
                 <path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z" />
@@ -160,8 +180,11 @@ export default class Mark extends React.Component {
                 fill="currentColor"
                 xmlns="http://www.w3.org/2000/svg"
                 onClick={() => {
-                  if (localStorage.getItem("userID") !== null)
-                    this.increaseValue("good");
+                  if (localStorage.getItem("userID") !== null) {
+                    this.increaseValue("bad");
+                  } else {
+                    this.props.signUp();
+                  }
                 }}
               >
                 <path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z" />

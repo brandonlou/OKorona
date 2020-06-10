@@ -8,11 +8,14 @@ import Nav from "./Nav.js";
 import Mark from "./marker.js";
 import Submit from "./submit.js";
 import SignUp from "./signup.js";
+
+//Entire Application
 export default class App extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      //Defines the view of the map
       viewport: {
         width: 400,
         height: 400,
@@ -20,17 +23,25 @@ export default class App extends React.Component {
         longitude: -118.453683,
         zoom: 13,
       },
+      //state variables to determine whether to show certain items
       showFoodbanks: true,
       showStore: true,
       showTest: true,
-      clear: false,
-      autoComp: {},
+      showTab: true,
       showForm: false,
       showSign: false,
+
+      //state variables that check whether something should be cleared or updated
+      clear: false,
       update: false,
-      bounds: null,
-      // userLoggedIn: localStorage.getItem("LoggedIn") ? true : false,
+
+      //these arrays/dicts hold data that will show markers/search results
+      foodbanks: [],
+      stores: [],
+      testing: [],
+      autoComp: {},
     };
+    //marker to map style theme
     this.theme = [
       {
         name: "Frank",
@@ -38,17 +49,27 @@ export default class App extends React.Component {
         info: "pink",
       },
     ];
+    //these arrays hold the marker data until completely collected
+    //afterwards they are transferred to the state arrays to update the map
     this.testing = [];
-    this.change = false;
-    this.origin = [];
     this.stores = [];
     this.foodbanks = [];
-    this.nav = null;
+
+    //update map variables
+    this.change = false;
     this.research = false;
-    this.map = null;
+    this.options = {};
+    this.origin = [];
+    this.userHome = {};
+
+    //references
     this.markRefs = [];
     this.mapRef = React.createRef();
-    this.options = {};
+    this.nav = null;
+    this.map = null;
+    this.tab = null;
+
+    //binding functions just in case a this hierarchy error occurs
     this.onViewportChange = this._onViewportChange.bind(this);
     this.autoComplete = this.autoComplete.bind(this);
     this.getOptions = this.getOptions.bind(this);
@@ -57,21 +78,29 @@ export default class App extends React.Component {
     this.userLoc = this.userLoc.bind(this);
     this.getLocations = this.getLocations.bind(this);
     this.render = this.render.bind(this);
-    // this.bringToTop = this.bringToTop.bind(this);
   }
 
+  //whenever viewport (what you see) changes
   _onViewportChange = (viewport) => {
-    // console.log("Logged in? " + localStorage.getItem("loggedIn"));
-    // console.log("User ID: " + localStorage.getItem("userID"));
+    //reset the viewport of the app
     this.setState({ viewport: viewport });
+
+    //if the map is rendered, get the markers in the area
     if (this.map) {
       this.getLocations();
     }
   };
 
+  //if the application has properly rendered
   componentWillMount() {
+    //create a navigation object that will get the user's location
     this.nav = new Nav(this.userLoc);
     this.nav.getLocation();
+  }
+  componentDidUpdate() {
+    if (this.map) {
+      this.getLocations();
+    }
   }
 
   getLocations() {
@@ -104,6 +133,9 @@ export default class App extends React.Component {
         .then((res) => res.json())
         .then((json) => {
           console.log(json);
+          this.testing = [];
+          this.foodbanks = [];
+          this.stores = [];
           for (const obj of json) {
             let add = true;
             switch (obj.type) {
@@ -143,6 +175,12 @@ export default class App extends React.Component {
               default:
                 break;
             }
+
+            this.setState({
+              testing: this.testing,
+              foodbanks: this.foodbanks,
+              stores: this.stores,
+            });
           }
         })
         .catch((error) => console.log(error));
@@ -151,11 +189,11 @@ export default class App extends React.Component {
         this.state.viewport.longitude,
       ];
       this.change = false;
-      this.render();
     }
   }
 
-  userLoc(lat, lon) {
+  userLoc(lat, lon, home = false) {
+    if (!lat || !lon) return;
     this.setState({
       viewport: {
         width: 400,
@@ -166,8 +204,26 @@ export default class App extends React.Component {
         clear: true,
       },
     });
+    if (home) {
+      let endpoint =
+        "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
+        lon +
+        "%2C%20" +
+        lat;
+      let query =
+        ".json?access_token=pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw";
+      fetch(endpoint + query)
+        .then((response) => response.json())
+        .then((results) => {
+          if (!results["features"]) return;
+          this.userHome = results["features"][0];
+          console.log(this.userHome);
+          console.log("Hi");
+        });
+    }
     this.change = true;
-    this.origin = [this.state.viewport.latitude, this.state.viewport.longitude];
+    this.origin = [lat, lon];
+    console.log("changed locations");
     this.getLocations();
   }
   componentDidMount() {
@@ -212,25 +268,25 @@ export default class App extends React.Component {
   // }
 
   // getZip(lat, lon) {
-  //   let endpoint =
-  //     "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
-  //     lon +
-  //     "%2C%20" +
-  //     lat;
-  //   let query =
-  //     ".json?access_token=pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw";
-  //   fetch(endpoint + query)
-  //     .then((response) => response.json())
-  //     .then((results) => {
-  //       let zip = null;
-  //       if (!results["features"]) return;
-  //       for (const id of results["features"]["0"]["context"]) {
-  //         if (id["id"].startsWith("postcode")) zip = parseInt(id["text"]);
-  //       }
-  //       if (!zip) {
-  //         return;
-  //       }
-  //       if (!(this.zips.indexOf(zip) >= 0)) this.zips.push(zip);
+  // let endpoint =
+  //   "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
+  //   lon +
+  //   "%2C%20" +
+  //   lat;
+  // let query =
+  //   ".json?access_token=pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw";
+  // fetch(endpoint + query)
+  //   .then((response) => response.json())
+  //   .then((results) => {
+  //     let zip = null;
+  //     if (!results["features"]) return;
+  //     for (const id of results["features"]["0"]["context"]) {
+  //       if (id["id"].startsWith("postcode")) zip = parseInt(id["text"]);
+  //     }
+  //     if (!zip) {
+  //       return;
+  //     }
+  //     if (!(this.zips.indexOf(zip) >= 0)) this.zips.push(zip);
   //     });
   // }
   // getFoodbanks(zip) {
@@ -287,18 +343,19 @@ export default class App extends React.Component {
     if (this.state.autoComp["features"]) {
       return (
         <React.Fragment>
-          <p style={{ height: "1vh", fontSize: "8px" }}>
+          <div style={{ height: "1vh", fontSize: "8px" }}>
             <em>Search Results</em>
-          </p>
+          </div>
           {this.state.autoComp["features"].map((option) => {
             return (
               <SearchBox
-                onClick={() =>
+                onClick={() => {
                   this.userLoc(
                     option["geometry"]["coordinates"][1],
                     option["geometry"]["coordinates"][0]
-                  )
-                }
+                  );
+                  this.clearResults(true);
+                }}
                 key={option["id"]}
                 address={option["place_name"]}
               />
@@ -390,168 +447,278 @@ export default class App extends React.Component {
         ) : (
           <div></div>
         )}
+
         <div
           className={css`
-            display: flex;
+            height: 100vh;
+            width: 100vw;
           `}
         >
-          <div
-            className={css`
-              width: 20vw;
-              height: 100%;
-              margin: 5px;
-            `}
+          <ReactMapGL
+            {...this.state.viewport}
+            width="100%"
+            height="100%"
+            maxZoom={20}
+            minZoom={12}
+            mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
+            onViewportChange={this._onViewportChange}
+            mapStyle="mapbox://styles/mapbox/navigation-guidance-day-v4"
+            ref={this.mapRef}
           >
-            <div className="search">
-              <Search
-                enter={() => {
-                  if (this.state.autoComp["features"]) {
-                    this.userLoc(
-                      this.state.autoComp["features"][0]["geometry"][
-                        "coordinates"
-                      ][1],
-                      this.state.autoComp["features"][0]["geometry"][
-                        "coordinates"
-                      ][0]
-                    );
-                  }
-                }}
-                autoComplete={this.autoComplete}
-                clearResults={this.clearResults}
-                reSearch={this.reSearch}
-              />
-            </div>
+            <Search
+              enter={() => {
+                if (this.state.autoComp["features"]) {
+                  this.userLoc(
+                    this.state.autoComp["features"][0]["geometry"][
+                      "coordinates"
+                    ][1],
+                    this.state.autoComp["features"][0]["geometry"][
+                      "coordinates"
+                    ][0]
+                  );
+                  this.change = true;
+                }
+              }}
+              autoComplete={this.autoComplete}
+              clearResults={this.clearResults}
+              reSearch={this.reSearch}
+            />
             <div className="searchwindow">{this.getOptions()}</div>
-            <div className="grid">
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "16%",
-                  height: "5vh",
-                  maxWidth: "20vw",
-                  paddingBottom: "3px",
-                }}
-              >
-                <div
-                  style={{ paddingBottom: "5px" }}
+
+            {this.state.showFoodbanks === true && this.foodbanks ? (
+              this.state.foodbanks.map((pt) => {
+                const lat = pt["location"]["coordinates"][1];
+                const lon = pt["location"]["coordinates"][0];
+                if (
+                  minLat < lat &&
+                  lat < maxLat &&
+                  minLon < lon &&
+                  lon < maxLon
+                )
+                  return (
+                    <Mark
+                      ref={this.markRefs[count]}
+                      key={pt["_id"]}
+                      id={pt["_id"]}
+                      signUp={() => {
+                        this.setState({
+                          showSign: true,
+                        });
+                      }}
+                      markerClick={() => this.singleMarker(count++)}
+                      lat={lat}
+                      lon={lon}
+                      address={pt["address"]}
+                      type={pt["type"]}
+                      name={pt["name"]}
+                      votes={pt["votes"]}
+                      color="rgb(247, 129, 50)"
+                    />
+                  );
+              })
+            ) : (
+              <div></div>
+            )}
+            {this.state.showTest === true && this.testing ? (
+              this.state.testing.map((pt) => {
+                const lat = pt["location"]["coordinates"][1];
+                const lon = pt["location"]["coordinates"][0];
+                if (
+                  minLat < lat &&
+                  lat < maxLat &&
+                  minLon < lon &&
+                  lon < maxLon
+                )
+                  return (
+                    <Mark
+                      ref={this.markRefs[count]}
+                      key={pt["_id"]}
+                      id={pt["_id"]}
+                      signUp={() => {
+                        this.setState({
+                          showSign: true,
+                        });
+                      }}
+                      markerClick={() => this.singleMarker(count++)}
+                      lat={lat}
+                      lon={lon}
+                      address={pt["address"]}
+                      type={pt["type"]}
+                      name={pt["name"]}
+                      votes={pt["votes"]}
+                      color="rgb(236, 59, 59)"
+                    />
+                  );
+              })
+            ) : (
+              <div></div>
+            )}
+            {this.state.showStore === true && this.stores ? (
+              this.state.stores.map((pt) => {
+                const lat = pt["location"]["coordinates"][1];
+                const lon = pt["location"]["coordinates"][0];
+                if (
+                  minLat < lat &&
+                  lat < maxLat &&
+                  minLon < lon &&
+                  lon < maxLon
+                )
+                  return (
+                    <Mark
+                      ref={this.markRefs[count]}
+                      key={pt["_id"]}
+                      id={pt["_id"]}
+                      signUp={() => {
+                        this.setState({
+                          showSign: true,
+                        });
+                      }}
+                      markerClick={() => this.singleMarker(count++)}
+                      lat={lat}
+                      lon={lon}
+                      address={pt["address"]}
+                      type={pt["type"]}
+                      name={pt["name"]}
+                      votes={pt["votes"]}
+                      color="rgb(62, 226, 98)"
+                    />
+                  );
+              })
+            ) : (
+              <div></div>
+            )}
+            <div className="tab" ref={this.tab}>
+              <label className="switch">
+                <input
+                  type="checkbox"
                   onClick={() => {
                     this.setState({
-                      showForm: false,
-                      showSign: true,
+                      showTest: !this.state.showTest,
                     });
                   }}
-                >
-                  Customize Map:
-                </div>
-              </div>
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "12%",
-                  height: "5vh",
-                  paddingBottom: "3px",
-                }}
-              >
-                <select
-                  onChange={(e) => {
-                    let theme = "";
-                    switch (e.target.value) {
-                      case "Decimal":
-                        theme =
-                          "mapbox://styles/ashleytz/ckaxpmear03nw1ilnsrbf75if";
-                        break;
-                      case "Standard":
-                        theme =
-                          "mapbox://styles/ashleytz/ckaxps4bp0ukt1jpmt2uxbvg8";
-                        break;
-                      case "Blueprint":
-                        theme =
-                          "mapbox://styles/ashleytz/ckaxptnwn05b61ioon15refau";
-                        break;
-                      case "Frank":
-                        theme =
-                          "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
-                        break;
-                      case "Night":
-                        theme =
-                          "mapbox://styles/mapbox/navigation-guidance-night-v4";
-                        break;
-                      case "Day":
-                        theme =
-                          "mapbox://styles/mapbox/navigation-guidance-day-v4";
-                        break;
-                      case "Satellite Streets":
-                        theme = "mapbox://styles/mapbox/satellite-streets-v11";
-                        break;
-                      case "Satellite":
-                        theme = "mapbox://styles/mapbox/satellite-v9";
-                        break;
-                      case "Dark":
-                        theme = "mapbox://styles/mapbox/dark-v10";
-                        break;
-                      case "Light":
-                        theme = "mapbox://styles/mapbox/light-v10";
-                        break;
-                      case "Outdoors":
-                        theme = "mapbox://styles/mapbox/outdoors-v11";
-                        break;
-                      default:
-                        // theme = "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
-                        theme =
-                          "mapbox://styles/mapbox/navigation-guidance-day-v4";
-                    }
-
-                    if (this.map) {
-                      console.log(this.map.getMap());
-                      this.map.getMap().setStyle(theme);
-                    }
-                  }}
-                >
-                  <option value="Day">Day</option>
-                  <option value="Frank">Frank</option>
-                  <option value="Decimal">Decimal</option>
-                  <option value="Standard">Standard</option>
-                  <option value="Blueprint">Blueprint</option>
-                  <option value="Night">Night</option>
-                  <option value="Satellite Streets">Satellite Streets</option>
-                  <option value="Satellite">Satellite</option>
-                  <option value="Dark">Dark</option>
-                  <option value="Light">Light</option>
-                  <option value="Outdoors">Outdoors</option>
-                </select>
-              </div>
-
-              <div
-                className="button"
-                style={{
-                  position: "absolute",
-                  bottom: "8%",
-                  maxWidth: "20vw",
-                }}
-              >
-                <div
+                />
+                <span className="toggle3">Testing Centers</span>
+              </label>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  onClick={() =>
+                    this.setState({
+                      showFoodbanks: !this.state.showFoodbanks,
+                    })
+                  }
+                />
+                <span className="toggle2">Foodbanks</span>
+              </label>
+              <label className="switch">
+                <input
+                  type="checkbox"
                   onClick={() => {
                     this.setState({
-                      showForm: true,
-                      showSign: false,
+                      showStore: !this.state.showStore,
                     });
                   }}
-                >
-                  Add Resource
-                </div>
-              </div>
-              {localStorage.getItem("userID") !== null ? (
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "4%",
-                    maxWidth: "20vw",
-                  }}
-                >
+                />
+                <span className="toggle">Stores</span>
+              </label>
+
+              <div className="bar">
+                <div className="column space">
                   <div
-                    className="button"
                     onClick={() => {
-                      console.log("remov");
+                      this.setState({
+                        showForm: false,
+                        showSign: true,
+                      });
+                    }}
+                  >
+                    Customize Map:
+                  </div>
+                  <select
+                    onChange={(e) => {
+                      let theme = "";
+                      switch (e.target.value) {
+                        case "Decimal":
+                          theme =
+                            "mapbox://styles/ashleytz/ckaxpmear03nw1ilnsrbf75if";
+                          break;
+                        case "Standard":
+                          theme =
+                            "mapbox://styles/ashleytz/ckaxps4bp0ukt1jpmt2uxbvg8";
+                          break;
+                        case "Blueprint":
+                          theme =
+                            "mapbox://styles/ashleytz/ckaxptnwn05b61ioon15refau";
+                          break;
+                        case "Frank":
+                          theme =
+                            "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
+                          break;
+                        case "Night":
+                          theme =
+                            "mapbox://styles/mapbox/navigation-guidance-night-v4";
+                          break;
+                        case "Day":
+                          theme =
+                            "mapbox://styles/mapbox/navigation-guidance-day-v4";
+                          break;
+                        case "Satellite Streets":
+                          theme =
+                            "mapbox://styles/mapbox/satellite-streets-v11";
+                          break;
+                        case "Satellite":
+                          theme = "mapbox://styles/mapbox/satellite-v9";
+                          break;
+                        case "Dark":
+                          theme = "mapbox://styles/mapbox/dark-v10";
+                          break;
+                        case "Light":
+                          theme = "mapbox://styles/mapbox/light-v10";
+                          break;
+                        case "Outdoors":
+                          theme = "mapbox://styles/mapbox/outdoors-v11";
+                          break;
+                        default:
+                          // theme = "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
+                          theme =
+                            "mapbox://styles/mapbox/navigation-guidance-day-v4";
+                      }
+
+                      if (this.map) {
+                        console.log(this.map.getMap());
+                        this.map.getMap().setStyle(theme);
+                      }
+                    }}
+                  >
+                    <option value="Day">Day</option>
+                    <option value="Frank">Frank</option>
+                    <option value="Decimal">Decimal</option>
+                    <option value="Standard">Standard</option>
+                    <option value="Blueprint">Blueprint</option>
+                    <option value="Night">Night</option>
+                    <option value="Satellite Streets">Satellite Streets</option>
+                    <option value="Satellite">Satellite</option>
+                    <option value="Dark">Dark</option>
+                    <option value="Light">Light</option>
+                    <option value="Outdoors">Outdoors</option>
+                  </select>
+                </div>
+                <div className="button space">
+                  <div
+                    onClick={() => {
+                      this.setState({
+                        showForm: true,
+                        showSign: false,
+                      });
+                    }}
+                  >
+                    Add Resource
+                  </div>
+                </div>
+                {localStorage.getItem("userID") !== null ? (
+                  <div
+                    className="button space"
+                    onClick={() => {
                       localStorage.removeItem("userID");
                       this.setState({
                         userLoggedIn: false,
@@ -560,17 +727,9 @@ export default class App extends React.Component {
                   >
                     Log out
                   </div>
-                </div>
-              ) : (
-                <div
-                  className="button"
-                  style={{
-                    position: "absolute",
-                    bottom: "4%",
-                    maxWidth: "20vw",
-                  }}
-                >
+                ) : (
                   <div
+                    className="button space"
                     onClick={() => {
                       this.setState({
                         showForm: false,
@@ -580,155 +739,10 @@ export default class App extends React.Component {
                   >
                     Log In / Sign Up
                   </div>
-                </div>
-              )}
-            </div>
-          </div>
-          <div
-            className={css`
-              height: 100vh;
-              width: 80vw;
-            `}
-          >
-            <ReactMapGL
-              {...this.state.viewport}
-              width="100%"
-              height="100%"
-              maxZoom={20}
-              minZoom={12}
-              mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
-              onViewportChange={this._onViewportChange}
-              mapStyle="mapbox://styles/mapbox/navigation-guidance-day-v4"
-              ref={this.mapRef}
-            >
-              <div
-                style={{
-                  fontSize: "15px",
-                }}
-              >
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    onClick={() => {
-                      this.setState({
-                        showTest: !this.state.showTest,
-                      });
-                    }}
-                  />
-                  <span className="toggle3">Testing Centers</span>
-                </label>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    onClick={() =>
-                      this.setState({
-                        showFoodbanks: !this.state.showFoodbanks,
-                      })
-                    }
-                  />
-                  <span className="toggle2">Foodbanks</span>
-                </label>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    onClick={() => {
-                      this.setState({
-                        showSore: !this.state.showStore,
-                      });
-                    }}
-                  />
-                  <span className="toggle">Stores</span>
-                </label>
+                )}
               </div>
-              {this.state.showFoodbanks === true && this.foodbanks ? (
-                this.foodbanks.map((pt) => {
-                  const lat = pt["location"]["coordinates"][1];
-                  const lon = pt["location"]["coordinates"][0];
-                  if (
-                    minLat < lat &&
-                    lat < maxLat &&
-                    minLon < lon &&
-                    lon < maxLon
-                  )
-                    return (
-                      <Mark
-                        ref={this.markRefs[count]}
-                        key={pt["_id"]}
-                        id={pt["_id"]}
-                        markerClick={() => this.singleMarker(count++)}
-                        lat={lat}
-                        lon={lon}
-                        address={pt["address"]}
-                        type={pt["type"]}
-                        name={pt["name"]}
-                        votes={pt["votes"]}
-                        color="rgb(247, 129, 50)"
-                      />
-                    );
-                })
-              ) : (
-                <div></div>
-              )}
-              {this.state.showTest === true && this.testing ? (
-                this.testing.map((pt) => {
-                  const lat = pt["location"]["coordinates"][1];
-                  const lon = pt["location"]["coordinates"][0];
-                  if (
-                    minLat < lat &&
-                    lat < maxLat &&
-                    minLon < lon &&
-                    lon < maxLon
-                  )
-                    return (
-                      <Mark
-                        ref={this.markRefs[count]}
-                        key={pt["_id"]}
-                        id={pt["_id"]}
-                        markerClick={() => this.singleMarker(count++)}
-                        lat={lat}
-                        lon={lon}
-                        address={pt["address"]}
-                        type={pt["type"]}
-                        name={pt["name"]}
-                        votes={pt["votes"]}
-                        color="rgb(236, 59, 59)"
-                      />
-                    );
-                })
-              ) : (
-                <div></div>
-              )}
-              {this.state.showStore === true && this.stores ? (
-                this.stores.map((pt) => {
-                  const lat = pt["location"]["coordinates"][1];
-                  const lon = pt["location"]["coordinates"][0];
-                  if (
-                    minLat < lat &&
-                    lat < maxLat &&
-                    minLon < lon &&
-                    lon < maxLon
-                  )
-                    return (
-                      <Mark
-                        ref={this.markRefs[count]}
-                        key={pt["_id"]}
-                        id={pt["_id"]}
-                        markerClick={() => this.singleMarker(count++)}
-                        lat={lat}
-                        lon={lon}
-                        address={pt["address"]}
-                        type={pt["type"]}
-                        name={pt["name"]}
-                        votes={pt["votes"]}
-                        color="rgb(62, 226, 98)"
-                      />
-                    );
-                })
-              ) : (
-                <div></div>
-              )}
-            </ReactMapGL>
-          </div>
+            </div>
+          </ReactMapGL>
         </div>
       </div>
     );

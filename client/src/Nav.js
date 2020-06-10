@@ -11,7 +11,7 @@ export default class Nav {
       navigator.geolocation.getCurrentPosition((position) => {
         this.lat = position.coords.latitude;
         this.lon = position.coords.longitude;
-        this.props(position.coords.latitude, position.coords.longitude);
+        this.props(position.coords.latitude, position.coords.longitude, true);
       });
     } else {
       alert("Geolocation is not supported by this browser");

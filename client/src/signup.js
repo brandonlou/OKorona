@@ -41,11 +41,15 @@ export default class SignUp extends React.Component {
     if (!(this.state.invalidLogin || this.state.invalidSignup)) return;
     const msg = this.signup
       ? "This username is taken!"
-      : "Invalid e-mail and password combination!";
+      : "Invalid username and password combination!";
     return <p className="invalid">{msg}</p>;
   }
 
   handleSubmit = async (e) => {
+    this.setState({
+      invalidLogin: false,
+      invalidSignup: false,
+    });
     console.log(e);
     e.preventDefault();
     fetch("api/login", {
@@ -60,7 +64,7 @@ export default class SignUp extends React.Component {
         email: this.state.signup ? this.state.email : "",
       }),
     })
-    .then((response) => response.json())
+      .then((response) => response.json())
       .then((response) => {
         e.preventDefault();
         if (response["ok"] === false) {
@@ -117,7 +121,13 @@ export default class SignUp extends React.Component {
               />
             </svg>
           </div>
-          {this.invalid()}
+          {() => {
+            this.invalid();
+            this.setState({
+              invalidLogin: false,
+              invalidSignup: false,
+            });
+          }}
           <div
             style={{
               display: "flex",
@@ -132,7 +142,7 @@ export default class SignUp extends React.Component {
           >
             <div
               className="button"
-              style={{ width: "10vw", maxHeight: "4vh", marginRight: "1vw" }}
+              style={{ maxHeight: "4vh", marginRight: "1vw" }}
               onClick={() => {
                 this.setState({
                   signup: false,
@@ -203,7 +213,6 @@ export default class SignUp extends React.Component {
             type="submit"
             style={{
               position: "absolute",
-              maxWidth: "10vw",
               left: "45%",
               bottom: "5%",
             }}

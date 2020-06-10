@@ -1,24 +1,116 @@
 /* .App {
   text-align: center;
 } */
+@media only screen and (max-width: 600px) {
+  .popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 80vw;
+    height: 70vh;
+    transform: translate(-50%, -50%);
+    color: rgb(45, 41, 54);
+    background-color: aliceblue;
+    z-index: 100;
+    border-color: cornflowerblue;
+    border-radius: 3px;
+    border-style: solid none solid none;
+    border-width: 3px;
+    overflow: auto;
+    z-index: 102;
+  }
+  .okorona {
+    transform: translate(40vw, 10vh);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgb(45, 41, 54);
+    font-size: 8vw;
+    height: 10vh;
+    font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+  }
+
+  .search {
+    border: 2px solid rgb(65, 62, 62);
+    border-radius: 3px;
+    outline: none;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    margin: 1vmin;
+    height: 4vh;
+    display: flex;
+    width: 50vw;
+  }
+  .searchbox {
+    background-color: transparent;
+    font-family: Lucida, Sans-Serif;
+    border-radius: 2px;
+    width: 50vw;
+  }
+  .searchwindow {
+    background-color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    flex-direction: column;
+    width: 50vw;
+  }
+  .markerInfo {
+    color: rgb(44, 39, 12);
+    /*rgb(255, 253, 244)*/
+    border: 3px solid rgb(187, 183, 163);
+    overflow: hidden;
+    background-color: rgb(255, 253, 244);
+    font-size: 2vw;
+    width: 25vmax;
+    height: 20vmax;
+    border-radius: 5px;
+    padding: 3px;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    right: -15vw;
+    bottom: -3vh;
+    overflow: auto;
+  }
+}
 .search {
-  width: 100%;
-  border: 1px solid black;
+  border: 1.5px solid rgb(3, 4, 48);
   border-radius: 3px;
   outline: none;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  margin: 1vmin;
+  height: 4vh;
+  display: flex;
+  width: 40vw;
+  font-weight: bold;
 }
-
-.input {
+.searchbar {
   width: 100%;
   overflow: hidden;
   border: none;
+  background-color: transparent;
+  color: rgb(65, 62, 62);
+  display: table-cell;
+}
+.searchbutton {
+  cursor: "pointer";
+  height: 100%;
+  width: 100%;
+  transform: scale(2em);
 }
 
 .searchbox {
-  width: 100%;
-  background-color: rgb(228, 228, 226);
+  background-color: transparent;
   font-family: Lucida, Sans-Serif;
   border-radius: 2px;
+  width: 40vw;
+  padding: 1px;
+  margin-top: 2px;
+}
+
+.space {
+  margin: 2vh;
 }
 
 .searchbox:hover {
@@ -26,15 +118,20 @@
 }
 
 .searchwindow {
-  background-color: rgb(228, 228, 226);
+  background-color: rgba(255, 255, 255, 0.8);
   display: flex;
   flex-direction: column;
+  width: 40vw;
+  transform: translate(1.5%, -7px);
+
+  padding: 2px;
 }
 
 .markerHead {
   display: flex;
   overflow: hidden;
   z-index: 100;
+  margin: 3px;
 }
 
 .markerSymbol {
@@ -48,6 +145,7 @@
   border: 3px solid rgb(187, 183, 163);
   overflow: hidden;
   background-color: rgb(255, 253, 244);
+  font-size: 1.5vw;
   width: 25vmax;
   height: 20vmax;
   border-radius: 5px;
@@ -90,8 +188,7 @@
   border-style: solid none solid none;
   border-width: 3px;
   overflow: auto;
-  /* display: grid;
-  grid-column: auto; */
+  z-index: 102;
 }
 
 .invalid {
@@ -103,13 +200,14 @@
   background-color: rgb(245, 242, 207);
   color: crimson;
 }
+form {
+  max-width: 100%;
+}
 
 .row {
   height: 8vh;
   display: flex;
   max-width: 100%;
-  transform: translateX(25px);
-  margin: auto;
   /* justify-content: center;
   align-content: center; */
 }
@@ -127,12 +225,12 @@ p {
 }
 
 .okorona {
-  display: fixed;
   transform: translate(75%, 50%);
   letter-spacing: 2px;
   text-transform: uppercase;
   color: rgb(45, 41, 54);
-  font-size: 3em;
+  font-size: 5vw;
+  height: 10vh;
   font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
 }
 
@@ -161,53 +259,31 @@ p {
   padding-right: 1vh;
 }
 
-#navigate {
+/* #navigate {
   border: 3px;
   background-color: darkblue;
   color: whitesmoke;
-}
-
-/* .button {
-  color: #fff;
-  text-transform: uppercase;
-
-  transition: all 0.3s;
-  overflow: hidden;
-  z-index: 1;
-} */
-/* .button::before {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 100%;
-  background-color: darken(#0cf, 15%);
-  transition: all 0.3s;
-  border-radius: 10rem;
-  z-index: -1;
-}
-
-.button:hover {
-  color: #fff;
-}
-
-.button::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 100%;
-  background-color: #0cf;
-  border-radius: 10rem;
-  z-index: -2;
 } */
 
-.grid {
+.tab {
+  bottom: 0;
+  position: absolute;
+  width: 100%;
+}
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(223, 217, 217);
+  width: 100%;
+  margin: 0, 1vw, 0, 1vw;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.column {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: inherit;
 }
 
 .switch {
@@ -220,15 +296,23 @@ p {
   width: 0;
   height: 0;
 }
+.toggle:hover {
+  border: 1px solid rgb(221, 228, 125);
+}
+.toggle2:hover {
+  border: 1px solid rgb(221, 228, 125);
+}
+.toggle3:hover {
+  border: 1px solid rgb(221, 228, 125);
+}
 .toggle {
   position: relative;
   display: inline-block;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: background-color 1s, color 1s;
   background-color: rgb(62, 226, 98);
   color: rgb(241, 235, 235);
   text-align: center;
-  max-width: 100%;
   margin: 3px;
   padding: 1vh;
   z-index: 101;
@@ -244,7 +328,6 @@ input:checked + .toggle {
   color: rgb(122, 117, 117);
   text-align: center;
   margin: 3px;
-  max-width: 100%;
   padding-left: 1vh;
   padding-right: 1vh;
   z-index: 101;
@@ -253,12 +336,11 @@ input:checked + .toggle {
 .toggle2 {
   position: relative;
   display: inline-block;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: background-color 1s, color 1s;
   background-color: rgb(247, 129, 50);
   color: rgb(241, 235, 235);
   text-align: center;
-  max-width: 100%;
   margin: 3px;
   padding: 1vh;
   z-index: 101;
@@ -273,7 +355,6 @@ input:checked + .toggle2 {
   color: rgb(122, 117, 117);
   text-align: center;
   margin: 3px;
-  max-width: 100%;
   padding-left: 1vh;
   padding-right: 1vh;
   z-index: 101;
@@ -282,12 +363,11 @@ input:checked + .toggle2 {
 .toggle3 {
   position: relative;
   display: inline-block;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: background-color 1s, color 1s;
   background-color: rgb(236, 59, 59);
   color: rgb(241, 235, 235);
   text-align: center;
-  max-width: 100%;
   margin: 3px;
   padding: 1vh;
   z-index: 101;
@@ -302,8 +382,17 @@ input:checked + .toggle3 {
   color: rgb(122, 117, 117);
   text-align: center;
   margin: 3px;
-  max-width: 100%;
   padding-left: 1vh;
   padding-right: 1vh;
   z-index: 101;
+}
+
+.circle {
+  width: 100px;
+  height: 100px;
+  padding: 50px;
+  border-radius: 200px;
+  border: double 15px rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.7);
+  background-clip: padding-box;
 }

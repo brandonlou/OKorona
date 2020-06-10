@@ -5,7 +5,7 @@ export default function SearchBox(props) {
   // const [longitude]'
   return (
     <div className="searchbox" onClick={props.onClick}>
-      <p style={{ fontSize: "12px", margin: "3px" }}>{props.address}</p>
+      <div style={{ fontSize: "14px" }}>{props.address}</div>
     </div>
   );
 }
