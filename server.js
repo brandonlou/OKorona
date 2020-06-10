@@ -60,7 +60,6 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-
 // Handles logging in. Responds with the user ID and array of upvotes and dowvotes.
 app.post('/api/login', async (req, res) => {
     const content = req.body;
@@ -72,11 +71,32 @@ app.post('/api/login', async (req, res) => {
         res.status(200).json({
             id: userInfo._id,
             upvotes: userInfo.upvotes,
-            downvotes: userInfo.downvotes
+            downvotes: userInfo.downvotes,
+            theme: userInfo.theme
         });
     } else {
         console.log("Incorrect username or password.");
         res.status(404).send("Incorrect username or password.");
+    }
+});
+
+// Handles logging in. Responds with the user ID and array of upvotes and dowvotes.
+app.post('/api/set_theme', async (req, res) => {
+    const content = req.body;
+    const userID = content.userID;
+    const theme = content.theme;
+    if(!userID || !theme) {
+        console.log("No user or theme specified.");
+        res.status(404).send("No user or theme specified.");
+        return;
+    }
+    const success = await updateThemeMongo(userID, theme);
+    if(success) {
+        console.log("Update theme success!");
+        res.status(200).send("Update theme success!");
+    } else {
+        console.log("Error updating theme in MongoDB.");
+        res.status(404).send("Error updating theme in MongoDB.");
     }
 });
 
@@ -213,6 +233,32 @@ stdin.addListener("data", async (input) => {
 });
 
 const mongoURL = "mongodb://nodeClient:cs97isgreat@ds253388.mlab.com:53388/heroku_bvrv3598";
+
+const updateThemeMongo = async (userID, theme) => {
+    const client = await mongo.connect(mongoURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }).catch((err) =>{
+        console.log(err);
+        return false;
+    });
+    
+    try {
+        const db = client.db("heroku_bvrv3598");
+        const collection = db.collection("Users");
+        const query = { "_id": new ObjectId(userID)};
+        const newValues = { $set: {"theme": theme}};
+        const res = await collection.updateOne(query, newValues);
+        console.log("MongoDB theme update successful!");
+        client.close();
+        return true;
+
+    } catch(err) {
+        console.log(err);
+        client.close();
+        return false;
+    }
+};
 
 const updateResourceVotes = async (resourceID, amt) => {
     const client = await mongo.connect(mongoURL, {
