@@ -41,13 +41,17 @@ app.post('/api/login', async (req, res) => {
     const content = req.body;
     const username = content.username;
     const password = content.password;
-    const userID = await findUserMongo(username, password);
-    if(userID) {
-        console.log("Found user ID: " + userID);
-        res.send(userID);
+    const userInfo = await findUserMongo(username, password);
+    if(userInfo) {
+        console.log("Found user: " + username);
+        res.status(200).json({
+            id: userInfo._id,
+            upvotes: userInfo.upvotes,
+            downvotes: userInfo.downvotes
+        });
     } else {
-        console.log("Could not find user ID.");
-        res.send("Error");
+        console.log("Incorrect username or password.");
+        res.status(404).send("Incorrect username or password.");
     }
 });
 
@@ -269,7 +273,7 @@ const findUserMongo = async (username, password) => {
         return null;
     });
 
-    let userID = null;
+    let userInfo = null;
 
     try {
         const db = client.db("heroku_bvrv3598");
@@ -277,7 +281,7 @@ const findUserMongo = async (username, password) => {
         const query = { "username": username, "password": password };
         const res = await collection.findOne(query);
         if(res) {
-            userID = res._id;
+            userInfo = res;
         }
         
     } catch(err) {
@@ -287,7 +291,7 @@ const findUserMongo = async (username, password) => {
         client.close();
     }
 
-    return userID;
+    return userInfo;
 
 };
 
