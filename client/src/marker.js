@@ -16,6 +16,7 @@ export default class Mark extends React.Component {
       showInfo: false,
       color: this.props.color,
       votes: this.props.votes,
+      userHome: this.props.userHome,
       userVote: 0,
     };
     this.handleMarkerClick = this.handleMarkerClick.bind(this);
@@ -52,6 +53,13 @@ export default class Mark extends React.Component {
   }
 
   handleNavigate() {
+    if (this.state.userHome.lat)
+    {
+      window.open(
+        navigateBaseUrl + this.state.userHome.lat + "," + this.state.userHome.lon + "/" + this.state.lat + "," + this.state.lon + "/@?hl=en"
+      );
+    }
+    else
     window.open(
       navigateBaseUrl + "/" + this.state.lat + "," + this.state.lon + "/@?hl=en"
     );

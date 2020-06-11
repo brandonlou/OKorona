@@ -214,6 +214,7 @@ export default class App extends React.Component {
         .then((results) => {
           if (!results["features"]) return;
           this.userHome = results["features"][0];
+          console.log("userHome: " + this.userHome);
         });
     }
     this.change = true;
@@ -642,6 +643,7 @@ export default class App extends React.Component {
                       name={pt["name"]}
                       votes={pt["votes"]}
                       color="rgb(247, 129, 50)"
+                      userHome={this.userHome}
                     />
                   );
                 return <div></div>;
@@ -677,6 +679,7 @@ export default class App extends React.Component {
                       name={pt["name"]}
                       votes={pt["votes"]}
                       color="rgb(236, 59, 59)"
+                      userHome={this.userHome}
                     />
                   );
                 return <div></div>;
@@ -713,6 +716,7 @@ export default class App extends React.Component {
                       name={pt["name"]}
                       votes={pt["votes"]}
                       color="rgb(62, 226, 98)"
+                      userHome={this.userHome}
                     />
                   );
                 return <div></div>;
