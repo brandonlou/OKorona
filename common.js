@@ -1,3 +1,7 @@
+/*
+ * The common.js module includes common functions that other server related modules may use.
+ */
+
 const fetch = require("node-fetch");
 
 const common = {};

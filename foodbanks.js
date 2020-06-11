@@ -5,21 +5,6 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 // First source.
-// const alphaScrape = (html) => {
-//     let listOfFoodbanks = [];
-//     $('table tbody tr', html).each((i, elem) => {
-//         const name = $('span[itemprop=name]', elem).text();
-//         const address = $('div[itemprop=address]', elem).text();
-//         const location = {
-//             "name": name,
-//             "address": address
-//         }
-//         listOfFoodbanks.push(location);
-//     });
-//     return listOfFoodbanks;
-// }
-
-// Second source.
 const betaScrape = (html) => {
     let listOfFoodbanks = [];
 
@@ -46,6 +31,7 @@ const betaScrape = (html) => {
     return listOfFoodbanks;
 }
 
+// Second source.
 const gammaScrape = (html) => {
 
     let listOfFoodbanks = [];
@@ -79,12 +65,10 @@ const foodbanks = {};
 // scraping function.
 foodbanks.getData = async () => {
 
-    // const alpha = "https://www.foodbanks.net/search.php?q=" + zipcode;
     const beta = "https://controllerdata.lacity.org/resource/v2mg-qsxf.json";
     const gamma = "https://ws2.feedingamerica.org/fawebservice.asmx/GetAllOrganizations";
 
     const sources = {
-        // [alpha]: alphaScrape,
         [beta]: betaScrape,
         [gamma]: gammaScrape
     };
