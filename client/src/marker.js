@@ -16,10 +16,28 @@ export default class Mark extends React.Component {
       showInfo: false,
       color: this.props.color,
       votes: this.props.votes,
+      userVote: 0,
     };
     this.handleMarkerClick = this.handleMarkerClick.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleNavigate = this.handleNavigate.bind(this);
+  }
+  componentDidMount() {
+    for (const resource of JSON.parse(localStorage.getItem("upvotes"))) {
+      console.log(resource + " " + this.state.id);
+      if (this.state.id == resource) {
+        console.log("Upvoted");
+        this.setState({
+          userVote: 1,
+        });
+      }
+    }
+    for (const resource of JSON.parse(localStorage.getItem("downvotes"))) {
+      if (this.state.id == resource)
+        this.setState({
+          userVote: -1,
+        });
+    }
   }
   handleMarkerClick() {
     this.setState({
@@ -41,22 +59,33 @@ export default class Mark extends React.Component {
 
   increaseValue(value) {
     const user = localStorage.getItem("userID");
-    const upvotes = localStorage.getItem("upvotes");
-    const downvotes = localStorage.getItem("downvotes");
+    let upvotes = JSON.parse(localStorage.getItem("upvotes"));
+    let downvotes = JSON.parse(localStorage.getItem("downvotes"));
     const resource = this.state.id;
     console.log(user + " " + resource);
+    console.log(upvotes);
+    console.log(downvotes);
     switch (value) {
       case "good":
         /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
-        if (resource in upvotes) {
+        if (upvotes.indexOf(resource) > -1) {
           return;
-        } else if (resource in downvotes) {
+        } else if (downvotes.indexOf(resource) > -1) {
           const index = downvotes.indexOf(resource);
-          upvotes.splice(index, 1);
+          downvotes.splice(index, 1);
           this.setState({
             votes: this.state.votes + 1,
+            userVote: 0,
+          });
+          localStorage.setItem("downvotes", JSON.stringify(downvotes));
+        } else {
+          upvotes.push(resource);
+          this.setState({
+            votes: this.state.votes + 1,
+            userVote: 1,
           });
         }
+        localStorage.setItem("upvotes", JSON.stringify(upvotes));
         fetch("./api/upvote", {
           method: "POST",
           headers: {
@@ -76,6 +105,24 @@ export default class Mark extends React.Component {
         break;
       case "bad":
         /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
+        if (downvotes.indexOf(resource) > -1) {
+          return;
+        } else if (upvotes.indexOf(resource) > -1) {
+          const index = upvotes.indexOf(resource);
+          upvotes.splice(index, 1);
+          this.setState({
+            votes: this.state.votes - 1,
+            userVote: 0,
+          });
+          localStorage.setItem("downvotes", JSON.stringify(upvotes));
+        } else {
+          downvotes.push(resource);
+          this.setState({
+            votes: this.state.votes - 1,
+            userVote: -1,
+          });
+        }
+        localStorage.setItem("downvotes", JSON.stringify(downvotes));
         fetch("./api/downvote", {
           method: "POST",
           headers: {
@@ -89,18 +136,10 @@ export default class Mark extends React.Component {
         })
           .then((response) => {
             console.log(response);
-            if (response.statusText === "OK")
-              this.setState({
-                votes: this.state.votes + 1,
-              });
           })
           .catch((error) => console.log(error));
-
-        //fetch(post to database about the upvote)
-        break;
     }
   }
-
   render() {
     return (
       <Marker latitude={this.state.lat} longitude={this.state.lon}>
@@ -124,7 +163,11 @@ export default class Mark extends React.Component {
             <div className="markerHead">
               <h5 style={{ width: "95%" }}>{this.state.name}</h5>
               <svg
-                onClick={this.handleClick}
+                onClick={() => {
+                  this.handleClick();
+                  console.log(this.state.id);
+                  console.log(this.state.userVote);
+                }}
                 style={{ width: "5%" }}
                 className="bi bi-x-circle-fill"
                 width="1em"
@@ -171,7 +214,7 @@ export default class Mark extends React.Component {
                 width="1em"
                 height="1em"
                 viewBox="0 0 16 16"
-                fill="currentColor"
+                fill={this.state.userVote === 1 ? "orange" : "currentColor"}
                 xmlns="http://www.w3.org/2000/svg"
                 onClick={() => {
                   if (localStorage.getItem("userID") !== null) {
@@ -189,7 +232,7 @@ export default class Mark extends React.Component {
                 width="1em"
                 height="1em"
                 viewBox="0 0 16 16"
-                fill="currentColor"
+                fill={this.state.userVote === -1 ? "orange" : "currentColor"}
                 xmlns="http://www.w3.org/2000/svg"
                 onClick={() => {
                   if (localStorage.getItem("userID") !== null) {

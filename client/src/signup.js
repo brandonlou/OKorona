@@ -45,7 +45,7 @@ export default class SignUp extends React.Component {
     return <div className="invalid">{msg}</div>;
   }
 
-  handleSubmit = async (e) => {
+  handleSubmit = (e) => {
     e.persist();
     this.setState({
       invalidLogin: false,
@@ -67,7 +67,7 @@ export default class SignUp extends React.Component {
           email: this.state.email,
           upvotes: [],
           downvotes: [],
-          theme: "Day",
+          theme: "mapbox://styles/mapbox/navigation-guidance-day-v4",
         }),
       })
         .then((response) => {
@@ -104,11 +104,17 @@ export default class SignUp extends React.Component {
         .then((response) => {
           console.log(response);
           localStorage.setItem("userID", response["id"]);
-          localStorage.setItem("upvotes", response["upvotes"]);
-          localStorage.setItem("downvotes", response["downvotes"]);
+          console.log(response["upvotes"]);
+          console.log(response["upvotes"]);
+          localStorage.setItem("upvotes", JSON.stringify(response["upvotes"]));
+          localStorage.setItem(
+            "downvotes",
+            JSON.stringify(response["upvotes"])
+          );
           localStorage.setItem("theme", response["theme"]);
+          console.log(localStorage.getItem("upvotes"));
+          console.log(localStorage.getItem("downvotes"));
           this.props.onClick();
-          this.props.changeTheme();
         })
         .catch((error) => {
           console.log(error);
