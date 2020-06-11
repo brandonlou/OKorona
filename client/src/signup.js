@@ -2,9 +2,11 @@ import React from "react";
 
 const fetch = require("node-fetch");
 
+//Component for the Sign up / Log in Popup
 export default class SignUp extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       signup: false,
       user: "",
@@ -14,11 +16,14 @@ export default class SignUp extends React.Component {
       invalidSignup: false,
       timeout: false,
     };
+
     this.handleUser = this.handleUser.bind(this);
     this.handlePass = this.handlePass.bind(this);
     this.handleEmail = this.handleEmail.bind(this);
     this.invalid = this.invalid.bind(this);
   }
+
+  //Handle User input
   handleUser(event) {
     this.setState({
       user: event.target.value,
@@ -37,6 +42,7 @@ export default class SignUp extends React.Component {
     });
   }
 
+  //Returns invalid submission message
   invalid() {
     if (!(this.state.invalidLogin || this.state.invalidSignup)) return;
     const msg = this.state.signup
@@ -45,16 +51,20 @@ export default class SignUp extends React.Component {
     return <div className="invalid">{msg}</div>;
   }
 
+  //handles both log in and sign up
   handleSubmit = (e) => {
     e.persist();
+
     this.setState({
       invalidLogin: false,
       invalidSignup: false,
     });
-    console.log(e);
+
     e.preventDefault();
+
+    //SIGNING UP
     if (this.state.signup) {
-      console.log("Signup");
+      //Post request that will set invalid to true if it throws an error
       fetch("./api/register", {
         method: "POST",
         headers: {
@@ -85,7 +95,10 @@ export default class SignUp extends React.Component {
             invalidLogin: false,
           });
         });
+
+      //LOGGING IN
     } else {
+      //Post request that will throw an error if username or email is already in use
       fetch("./api/login", {
         method: "POST",
         headers: {
@@ -97,27 +110,21 @@ export default class SignUp extends React.Component {
           password: this.state.pass,
         }),
       })
+        .then((response) => response.json())
         .then((response) => {
-          console.log(response);
-          return response.json();
-        })
-        .then((response) => {
-          console.log(response);
+          //SET ALL OF THE LOCAL STORAGE HERE
           localStorage.setItem("userID", response["id"]);
-          console.log(response["upvotes"]);
-          console.log(response["upvotes"]);
           localStorage.setItem("upvotes", JSON.stringify(response["upvotes"]));
           localStorage.setItem(
             "downvotes",
             JSON.stringify(response["upvotes"])
           );
           localStorage.setItem("theme", response["theme"]);
-          console.log(localStorage.getItem("upvotes"));
-          console.log(localStorage.getItem("downvotes"));
+
+          //close popup
           this.props.onClick();
         })
         .catch((error) => {
-          console.log(error);
           e.preventDefault();
           this.setState({
             invalidLogin: true,
@@ -138,7 +145,13 @@ export default class SignUp extends React.Component {
         >
           <div className="row" style={{ maxHeight: "4vh" }}>
             <svg
-              onClick={this.props.onClick}
+              onClick={() => {
+                this.props.onClick();
+                this.setState({
+                  invalidLogin: false,
+                  invalidSignup: false,
+                });
+              }}
               style={{
                 position: "absolute",
                 width: "5%",

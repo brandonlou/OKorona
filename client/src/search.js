@@ -1,20 +1,25 @@
 import React, { Component } from "react";
 import "./App.css";
-// import ReactMapGL from "react-map-gl";
 
+//Component for Search Bar
 export default class Search extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       query: "",
     };
+
     this.search = React.createRef();
     this._handleKeyDown = this._handleKeyDown.bind(this);
   }
+
+  //if updated, continue autocomplete
   componentDidUpdate() {
     this.props.reSearch(true);
   }
 
+  //handle the entering of keys
   _handleKeyDown(e) {
     if (e.key === "Enter") {
       this.props.enter();
@@ -22,11 +27,6 @@ export default class Search extends Component {
     }
     this.props.clearResults(true);
   }
-  // onEnter(e){
-  //   if(e.keyCode == 13 && this.search.current.value.length > 3){
-  //     this.props.enter();
-  //   }
-  // }
 
   render() {
     return (

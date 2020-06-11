@@ -2,20 +2,26 @@ import React from "react";
 
 const fetch = require("node-fetch");
 
+//Component for adding a resource
 export default class Submit extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       name: "",
       address: "",
       type: "Foodbank",
     };
-    this.select = React.createRef();
+
     this.handleName = this.handleName.bind(this);
     this.handleAddress = this.handleAddress.bind(this);
     this.handleType = this.handleType.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+
+  /*
+  set all the components to the right value
+  */
   handleName(event) {
     this.setState({
       name: event.target.value,
@@ -33,7 +39,8 @@ export default class Submit extends React.Component {
     });
   }
 
-  handleSubmit = (e) => {
+  //when the user submits, send a POST request to add the resource
+  handleSubmit(e) {
     let type = "";
     switch (this.state.type) {
       case "Foodbank":
@@ -48,7 +55,9 @@ export default class Submit extends React.Component {
       default:
         break;
     }
+
     e.preventDefault();
+
     fetch("./api/add_resource", {
       method: "POST",
       headers: {
@@ -71,7 +80,7 @@ export default class Submit extends React.Component {
       .catch((error) => {
         console.log(error);
       });
-  };
+  }
 
   render() {
     return (
