@@ -85,10 +85,10 @@ export default class App extends React.Component {
     //reset the viewport of the app
     this.setState({ viewport: viewport });
 
-    //if the map is rendered, get the markers in the area
-    if (this.map) {
-      this.getLocations();
-    }
+    // //if the map is rendered, get the markers in the area
+    // if (this.map) {
+    //   this.getLocations();
+    // }
   };
 
   //if the application has properly rendered
@@ -97,6 +97,8 @@ export default class App extends React.Component {
     this.nav = new Nav(this.userLoc);
     this.nav.getLocation();
   }
+
+  //If the component has updated,
   componentDidUpdate() {
     if (this.map) {
       this.getLocations();
@@ -114,9 +116,9 @@ export default class App extends React.Component {
       Math.pow(this.state.viewport.latitude - this.origin[0], 2) +
         Math.pow(this.state.viewport.longitude - this.origin[1], 2)
     );
-    console.log(maxRad);
-    console.log(radius);
-    if ((radius > maxRad - 0.3) | this.change) {
+    if ((radius > maxRad - 0.4) | this.change) {
+      console.log(maxRad);
+      console.log(radius);
       fetch("./api/get_resource", {
         method: "POST",
         headers: {
@@ -342,7 +344,7 @@ export default class App extends React.Component {
 
     if (this.state.autoComp["features"]) {
       return (
-        <React.Fragment>
+        <div className="searchwindow">
           <div style={{ height: "1vh", fontSize: "8px" }}>
             <em>Search Results</em>
           </div>
@@ -361,7 +363,7 @@ export default class App extends React.Component {
               />
             );
           })}
-        </React.Fragment>
+        </div>
       );
     }
   }
@@ -373,16 +375,16 @@ export default class App extends React.Component {
     }
   }
 
-  componentWillUpdate() {
-    // if (this.zips.length > 0) {
-    //   for (const zip of this.zips) {
-    //     this.getFoodbanks(zip);
-    //   }
-    // }
-    // if (this.foodbanks) {
-    //   this.pastFood = this.foodbanks.slice(0);
-    // }
-  }
+  // componentWillUpdate() {
+  // if (this.zips.length > 0) {
+  //   for (const zip of this.zips) {
+  //     this.getFoodbanks(zip);
+  //   }
+  // }
+  // if (this.foodbanks) {
+  //   this.pastFood = this.foodbanks.slice(0);
+  // }
+  // }
   // bringToTop(obj) {
   //   let elem = this.elements;
   //   if (!obj) return;
@@ -459,32 +461,12 @@ export default class App extends React.Component {
             width="100%"
             height="100%"
             maxZoom={20}
-            minZoom={12}
+            minZoom={10}
             mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
             onViewportChange={this._onViewportChange}
             mapStyle="mapbox://styles/mapbox/navigation-guidance-day-v4"
             ref={this.mapRef}
           >
-            <Search
-              enter={() => {
-                if (this.state.autoComp["features"]) {
-                  this.userLoc(
-                    this.state.autoComp["features"][0]["geometry"][
-                      "coordinates"
-                    ][1],
-                    this.state.autoComp["features"][0]["geometry"][
-                      "coordinates"
-                    ][0]
-                  );
-                  this.change = true;
-                }
-              }}
-              autoComplete={this.autoComplete}
-              clearResults={this.clearResults}
-              reSearch={this.reSearch}
-            />
-            <div className="searchwindow">{this.getOptions()}</div>
-
             {this.state.showFoodbanks === true && this.foodbanks ? (
               this.state.foodbanks.map((pt) => {
                 const lat = pt["location"]["coordinates"][1];
@@ -497,6 +479,7 @@ export default class App extends React.Component {
                 )
                   return (
                     <Mark
+                      style={{ position: "fixed", zIndex: "0" }}
                       ref={this.markRefs[count]}
                       key={pt["_id"]}
                       id={pt["_id"]}
@@ -531,6 +514,7 @@ export default class App extends React.Component {
                 )
                   return (
                     <Mark
+                      style={{ position: "fixed", zIndex: "0" }}
                       ref={this.markRefs[count]}
                       key={pt["_id"]}
                       id={pt["_id"]}
@@ -565,6 +549,7 @@ export default class App extends React.Component {
                 )
                   return (
                     <Mark
+                      style={{ position: "fixed", zIndex: "0" }}
                       ref={this.markRefs[count]}
                       key={pt["_id"]}
                       id={pt["_id"]}
@@ -587,6 +572,25 @@ export default class App extends React.Component {
             ) : (
               <div></div>
             )}
+            <Search
+              enter={() => {
+                if (this.state.autoComp["features"]) {
+                  this.userLoc(
+                    this.state.autoComp["features"][0]["geometry"][
+                      "coordinates"
+                    ][1],
+                    this.state.autoComp["features"][0]["geometry"][
+                      "coordinates"
+                    ][0]
+                  );
+                  this.change = true;
+                }
+              }}
+              autoComplete={this.autoComplete}
+              clearResults={this.clearResults}
+              reSearch={this.reSearch}
+            />
+            <div>{this.getOptions()}</div>
             <div className="tab" ref={this.tab}>
               <label className="switch">
                 <input

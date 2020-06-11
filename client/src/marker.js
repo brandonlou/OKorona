@@ -43,6 +43,7 @@ export default class Mark extends React.Component {
   increaseValue(value) {
     const user = localStorage.getItem("userID");
     const resource = this.state.id;
+    console.log(user + " " + resource);
     switch (value) {
       case "good":
         /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
@@ -58,6 +59,7 @@ export default class Mark extends React.Component {
           }),
         })
           .then((response) => {
+            console.log(response);
             if (response.statusText === "OK")
               this.setState({
                 votes: this.state.votes + 1,
@@ -70,13 +72,17 @@ export default class Mark extends React.Component {
         /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
         fetch("./api/downvote", {
           method: "POST",
-          headers: { "Content-type": "application/json" },
+          headers: {
+            Accept: "application/json",
+            "Content-type": "application/json",
+          },
           body: JSON.stringify({
             userID: user,
             resourceID: resource,
           }),
         })
           .then((response) => {
+            console.log(response);
             if (response.statusText === "OK")
               this.setState({
                 votes: this.state.votes + 1,
