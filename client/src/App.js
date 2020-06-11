@@ -31,6 +31,7 @@ export default class App extends React.Component {
       showTab: true,
       showForm: false,
       showSign: false,
+      welcome: true,
 
       //state variables that check whether something should be cleared or updated
       clear: false,
@@ -221,7 +222,15 @@ export default class App extends React.Component {
   }
   componentDidMount() {
     this.map = this.mapRef.current;
-
+    let visited = localStorage["visited"];
+    if (visited) {
+      this.setState({
+        welcome: false,
+      });
+    } else {
+      localStorage["visited"] = true;
+      this.setState({ welcome: true });
+    }
     if (this.nav !== null) {
       this.userLoc(this.nav.latitude, this.nav.longitude);
     }
@@ -359,12 +368,12 @@ export default class App extends React.Component {
     }
   }
 
-  singleMarker(i) {
-    for (let c = 0; c < this.markRefs.length(); c++) {
-      console.log(this.markRefs[c].current);
-      if (c !== i) this.markRefs[c].current.handleMarkerClick();
-    }
-  }
+  // singleMarker(i) {
+  //   for (let c = 0; c < this.markRefs.length(); c++) {
+  //     console.log(this.markRefs[c].current);
+  //     if (c !== i) this.markRefs[c].current.handleMarkerClick();
+  //   }
+  // }
 
   // getName(theme) {
   //   switch (theme) {
@@ -504,7 +513,8 @@ export default class App extends React.Component {
       : "mapbox://styles/mapbox/navigation-guidance-day-v4";
     if (this.select.current) {
       const name = this.getTheme(this.select.current.value);
-      if (name !== mapTHEME) this.select.current.value = 0;
+      if (name !== "mapbox://styles/mapbox/navigation-guidance-day-v4")
+        this.select.current.value = 0;
     }
     if (this.map) {
       const bounds = this.map.getMap().getBounds();
@@ -515,6 +525,48 @@ export default class App extends React.Component {
     }
     return (
       <div className="App">
+        {this.state.welcome ? (
+          <div className="popup welcome">
+            <div className="row" style={{ maxHeight: "4vh" }}>
+              <svg
+                onClick={() => {
+                  this.setState({
+                    welcome: false,
+                  });
+                }}
+                style={{
+                  position: "absolute",
+                  width: "5%",
+                  right: "2%",
+                  margin: "2%",
+                  height: "2vh",
+                }}
+                className="bi bi-x-circle-fill"
+                width="1em"
+                height="1em"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-4.146-3.146a.5.5 0 0 0-.708-.708L8 7.293 4.854 4.146a.5.5 0 1 0-.708.708L7.293 8l-3.147 3.146a.5.5 0 0 0 .708.708L8 8.707l3.146 3.147a.5.5 0 0 0 .708-.708L8.707 8l3.147-3.146z"
+                />
+              </svg>
+            </div>
+            <div style={{ margin: "5%" }}>
+              Welcome! <br />
+              <br /> Search for locations to find COVID-19-related resources
+              that we've compiled from the web and from user contributions.
+              Filter our the resources using the toggles below, and customize
+              the map to your pleasure. Log in or sign up to rate the resources
+              or add resources yourself! <br /> <br />
+              Wishing you the best, <br /> the OKorona Team
+            </div>
+          </div>
+        ) : (
+          <div />
+        )}
         {this.state.showSign ? (
           <SignUp
             onClick={() => {
@@ -592,11 +644,7 @@ export default class App extends React.Component {
                       color="rgb(247, 129, 50)"
                     />
                   );
-<<<<<<< HEAD
                 return <div></div>;
-=======
-                  else return(<div key={pt["_id"]}></div>);
->>>>>>> 0f3f249fe9b3471bfeab34b3319c4d53090a50d7
               })
             ) : (
               <div></div>
@@ -631,11 +679,7 @@ export default class App extends React.Component {
                       color="rgb(236, 59, 59)"
                     />
                   );
-<<<<<<< HEAD
                 return <div></div>;
-=======
-                  else return(<div key={pt["_id"]}></div>);
->>>>>>> 0f3f249fe9b3471bfeab34b3319c4d53090a50d7
               })
             ) : (
               <div></div>
@@ -671,11 +715,7 @@ export default class App extends React.Component {
                       color="rgb(62, 226, 98)"
                     />
                   );
-<<<<<<< HEAD
                 return <div></div>;
-=======
-                else return(<div key={pt["_id"]}></div>);
->>>>>>> 0f3f249fe9b3471bfeab34b3319c4d53090a50d7
               })
             ) : (
               <div></div>
@@ -782,6 +822,9 @@ export default class App extends React.Component {
                     className="button space"
                     onClick={() => {
                       localStorage.removeItem("userID");
+                      localStorage.removeItem("upvotes");
+                      localStorage.removeItem("downvotes");
+                      localStorage.removeItem("theme");
                       this.setState({
                         userLoggedIn: false,
                       });

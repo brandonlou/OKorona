@@ -401,3 +401,10 @@ input:checked + .toggle3 {
   background: rgba(255, 255, 255, 0.7);
   background-clip: padding-box;
 }
+
+.welcome {
+  justify-content: center;
+  padding: 3%;
+  width: auto;
+  height: auto;
+}

@@ -233,7 +233,11 @@ export default class SignUp extends React.Component {
                   type="text"
                   value={this.state.email}
                   onChange={this.handleEmail}
-                  style={{ position: "absolute", right: "5vw", width: "60%" }}
+                  style={{
+                    position: "absolute",
+                    right: "5vw",
+                    width: "60%",
+                  }}
                 ></input>
               </div>
             ) : (
