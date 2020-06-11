@@ -26,20 +26,22 @@ export default class Mark extends React.Component {
 
   //check to see if the user is logged in and if they are, check whether they have upvoted an item
   componentDidMount() {
-    for (const resource of JSON.parse(localStorage.getItem("upvotes"))) {
-      console.log(resource + " " + this.state.id);
-      if (this.state.id === resource) {
-        console.log("Upvoted");
-        this.setState({
-          userVote: 1,
-        });
+    if (localStorage["upvotes"]) {
+      for (const resource of JSON.parse(localStorage.getItem("upvotes"))) {
+        console.log(resource + " " + this.state.id);
+        if (this.state.id === resource) {
+          console.log("Upvoted");
+          this.setState({
+            userVote: 1,
+          });
+        }
       }
-    }
-    for (const resource of JSON.parse(localStorage.getItem("downvotes"))) {
-      if (this.state.id === resource)
-        this.setState({
-          userVote: -1,
-        });
+      for (const resource of JSON.parse(localStorage.getItem("downvotes"))) {
+        if (this.state.id === resource)
+          this.setState({
+            userVote: -1,
+          });
+      }
     }
   }
 

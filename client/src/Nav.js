@@ -1,6 +1,7 @@
 //Sends request for user location, if not allowed, the application will return to Los Angeles
 export default class Nav {
   constructor(props) {
+    console.log("In Nav");
     this.props = props;
     this.lat = null;
     this.lon = null;
@@ -8,6 +9,7 @@ export default class Nav {
     this.userLoc = props.userLoc;
   }
   getLocation() {
+    console.log("In Nav");
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         this.lat = position.coords.latitude;

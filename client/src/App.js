@@ -50,14 +50,13 @@ export default class App extends React.Component {
     this.foodbanks = [];
 
     //update map variables
-    this.change = false;
+    this.change = true;
     this.research = false;
     this.options = {};
     this.origin = [];
     this.userHome = {};
 
     //references
-    this.markRefs = [];
     this.mapRef = React.createRef();
     this.select = React.createRef();
     this.nav = null;
@@ -80,10 +79,10 @@ export default class App extends React.Component {
     //reset the viewport of the app
     this.setState({ viewport: viewport });
 
-    // //if the map is rendered, get the markers in the area
-    // if (this.map) {
-    //   this.getLocations();
-    // }
+    //if the map is rendered, get the markers in the area
+    if (this.map) {
+      this.getLocations();
+    }
   };
 
   //if the application has properly rendered
@@ -153,7 +152,6 @@ export default class App extends React.Component {
                   }
                 }
                 if (add) {
-                  this.markRefs.push(React.createRef());
                   this.testing.push(obj);
                 }
                 break;
@@ -164,7 +162,6 @@ export default class App extends React.Component {
                   }
                 }
                 if (add) {
-                  this.markRefs.push(React.createRef());
                   this.foodbanks.push(obj);
                 }
                 break;
@@ -175,7 +172,6 @@ export default class App extends React.Component {
                   }
                 }
                 if (add) {
-                  this.markRefs.push(React.createRef());
                   this.stores.push(obj);
                 }
                 break;
@@ -249,6 +245,8 @@ export default class App extends React.Component {
   set the map reference and get locations
   */
   componentDidMount() {
+    this.nav = new Nav(this.userLoc);
+    this.nav.getLocation();
     this.map = this.mapRef.current;
     let visited = localStorage["visited"];
     if (visited) {
@@ -262,6 +260,7 @@ export default class App extends React.Component {
     if (this.nav !== null) {
       this.userLoc(this.nav.latitude, this.nav.longitude);
     }
+
     this.getLocations();
   }
 
@@ -396,7 +395,6 @@ export default class App extends React.Component {
 
   render() {
     //calculation of closer boundaries so that the map doesn't have to render all of the resources in the array every time
-    let count = 0;
     let maxLon = 0;
     let maxLat = 0;
     let minLon = 0;
@@ -523,7 +521,6 @@ export default class App extends React.Component {
                   return (
                     <Mark
                       style={{ position: "fixed", zIndex: "0" }}
-                      ref={this.markRefs[count]}
                       key={pt["_id"]}
                       id={pt["_id"]}
                       signUp={() => {
@@ -531,7 +528,6 @@ export default class App extends React.Component {
                           showSign: true,
                         });
                       }}
-                      markerClick={() => this.singleMarker(count++)}
                       lat={lat}
                       lon={lon}
                       address={pt["address"]}
@@ -541,7 +537,7 @@ export default class App extends React.Component {
                       color="rgb(247, 129, 50)"
                     />
                   );
-                return <div></div>;
+                return <div key={pt["_id"]}></div>;
               })
             ) : (
               <div></div>
@@ -558,7 +554,6 @@ export default class App extends React.Component {
                 )
                   return (
                     <Mark
-                      ref={this.markRefs[count]}
                       key={pt["_id"]}
                       id={pt["_id"]}
                       signUp={() => {
@@ -566,7 +561,6 @@ export default class App extends React.Component {
                           showSign: true,
                         });
                       }}
-                      markerClick={() => this.singleMarker(count++)}
                       lat={lat}
                       lon={lon}
                       address={pt["address"]}
@@ -576,7 +570,7 @@ export default class App extends React.Component {
                       color="rgb(236, 59, 59)"
                     />
                   );
-                return <div></div>;
+                return <div key={pt["_id"]}></div>;
               })
             ) : (
               <div></div>
@@ -593,8 +587,6 @@ export default class App extends React.Component {
                 )
                   return (
                     <Mark
-                      style={{ position: "fixed", zIndex: "0" }}
-                      ref={this.markRefs[count]}
                       key={pt["_id"]}
                       id={pt["_id"]}
                       signUp={() => {
@@ -602,7 +594,6 @@ export default class App extends React.Component {
                           showSign: true,
                         });
                       }}
-                      markerClick={() => this.singleMarker(count++)}
                       lat={lat}
                       lon={lon}
                       address={pt["address"]}
@@ -612,7 +603,7 @@ export default class App extends React.Component {
                       color="rgb(62, 226, 98)"
                     />
                   );
-                return <div></div>;
+                return <div key={pt["_id"]}></div>;
               })
             ) : (
               <div></div>
