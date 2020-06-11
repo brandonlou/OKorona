@@ -23,21 +23,27 @@ export default class Mark extends React.Component {
     this.handleNavigate = this.handleNavigate.bind(this);
   }
   componentDidMount() {
-    for (const resource of JSON.parse(localStorage.getItem("upvotes"))) {
-      console.log(resource + " " + this.state.id);
-      if (this.state.id == resource) {
-        console.log("Upvoted");
-        this.setState({
-          userVote: 1,
-        });
+    if(localStorage.getItem("upvotes")) {
+      for (const resource of JSON.parse(localStorage.getItem("upvotes"))) {
+        console.log(resource + " " + this.state.id);
+        if (this.state.id === resource) {
+          console.log("Upvoted");
+          this.setState({
+            userVote: 1,
+          });
+        }
       }
     }
-    for (const resource of JSON.parse(localStorage.getItem("downvotes"))) {
-      if (this.state.id == resource)
-        this.setState({
-          userVote: -1,
-        });
+
+    if(localStorage.getItem("downvotes")) {
+      for (const resource of JSON.parse(localStorage.getItem("downvotes"))) {
+        if (this.state.id === resource)
+          this.setState({
+            userVote: -1,
+          });
+      }
     }
+    
   }
   handleMarkerClick() {
     this.setState({
@@ -138,6 +144,9 @@ export default class Mark extends React.Component {
             console.log(response);
           })
           .catch((error) => console.log(error));
+          break;
+        default:
+          break;
     }
   }
   render() {

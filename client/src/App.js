@@ -118,8 +118,8 @@ export default class App extends React.Component {
         Math.pow(this.state.viewport.longitude - this.origin[1], 2)
     );
     if ((radius > maxRad - 0.4) | this.change) {
-      console.log(maxRad);
-      console.log(radius);
+      // console.log(maxRad);
+      // console.log(radius);
       fetch("./api/get_resource", {
         method: "POST",
         headers: {
@@ -135,7 +135,7 @@ export default class App extends React.Component {
       })
         .then((res) => res.json())
         .then((json) => {
-          console.log(json);
+          // console.log(json);
           this.testing = [];
           this.foodbanks = [];
           this.stores = [];
@@ -561,7 +561,7 @@ export default class App extends React.Component {
                       color="rgb(247, 129, 50)"
                     />
                   );
-                  else return(<div></div>);
+                  else return(<div key={pt["_id"]}></div>);
               })
             ) : (
               <div></div>
@@ -596,7 +596,7 @@ export default class App extends React.Component {
                       color="rgb(236, 59, 59)"
                     />
                   );
-                  else return(<div></div>);
+                  else return(<div key={pt["_id"]}></div>);
               })
             ) : (
               <div></div>
@@ -632,7 +632,7 @@ export default class App extends React.Component {
                       color="rgb(62, 226, 98)"
                     />
                   );
-                else return(<div></div>);
+                else return(<div key={pt["_id"]}></div>);
               })
             ) : (
               <div></div>
