@@ -62,16 +62,18 @@ export default class Mark extends React.Component {
 
   //navigation button opens up a google maps navigation tab
   handleNavigate() {
-    if (this.state.userHome.lat)
+    if (typeof(this.state.userHome) !== 'undefined' && typeof(this.state.userHome.place_name) !== 'undefined')
     {
       window.open(
-        navigateBaseUrl + this.state.userHome.lat + "," + this.state.userHome.lon + "/" + this.state.lat + "," + this.state.lon + "/@?hl=en"
+        navigateBaseUrl + this.state.userHome.place_name + "/" + this.state.lat + "," + this.state.lon + "/@?hl=en"
       );
     }
-    else
+    else {
+      console.log("No coordinates found");
     window.open(
       navigateBaseUrl + "/" + this.state.lat + "," + this.state.lon + "/@?hl=en"
     );
+    }
   }
 
   //handles the up or downvote of a user
