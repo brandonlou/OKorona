@@ -80,7 +80,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Handles logging in. Responds with the user ID and array of upvotes and dowvotes.
+// Updates a user's theme specifying the user's ID and new theme
 app.post('/api/set_theme', async (req, res) => {
     const content = req.body;
     const userID = content.userID;
@@ -242,7 +242,7 @@ const updateThemeMongo = async (userID, theme) => {
         console.log(err);
         return false;
     });
-    
+
     try {
         const db = client.db("heroku_bvrv3598");
         const collection = db.collection("Users");
