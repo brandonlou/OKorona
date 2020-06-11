@@ -1,11 +1,10 @@
 import React from "react";
 
+//Functional component that displays the search options
 export default function SearchBox(props) {
-  // const [latitude, setLatitude] = useState(props.latitude)
-  // const [longitude]
   return (
-    <div className="searchbox">
-      <p style={{ fontSize: "12px", margin: "3px" }}>{props.address}</p>
+    <div className="searchbox" onClick={props.onClick}>
+      <div style={{ fontSize: "14px" }}>{props.address}</div>
     </div>
   );
 }
