@@ -1,17 +1,18 @@
 # OKorona
 
-OKorona is an all(well, most)-in-one resources map for pandemic situations like COVID-19.
-It displays foodbanks, testing locations and stores around the user's location on a map-based Graphical User Interface.
+OKorona is an all-in-one resources map for the COVID-19 pandemic and can be expanded to other crisis.
+It displays foodbanks, testing locations, and stores around the user's location on an interactive, searchable map.
 
 As of now, only locations in the United States are supported.
 
 App Features:
 
 * Autocomplete search to get resource information at a particular location.
-* Option to upvote/downvote resources to rate a particular resource's reliability.
-* Google Maps Add-on - Users have the option to open Google Maps to get directions to a particular resource.
-* Option to add a resource found by the user, although for security/verification purposes, this will require the creation of an account.
+* Upvote/downvote resources to rate a particular resource's reliability.
+* Google Maps navigation - Users have the option to open Google Maps to get directions to a particular resource.
+* Add a resource found by the user, although for security/verification purposes, this will require the creation of an account.
 * Sign-up and login for users to personalize their experience
+* And more!
 
 ### Sources of Data
 
@@ -19,7 +20,7 @@ OKorona sources its data from crowd-sourced APIs. Although, the authenticity of 
 
 * Foodbank Locations: [Feeding America](https://www.feedingamerica.org/find-your-local-foodbank)
 * Testing Centers: [Postman COVID-19 APIs](https://covid-19-apis.postman.com/covid-19-testing-locations/)
-* Stores: 
+* And more to be listed!
 
 ### How to run locally
 
@@ -29,11 +30,9 @@ OKorona sources its data from crowd-sourced APIs. Although, the authenticity of 
 3. Run `npm run build` to automatically install server and client dependencies.
 4. Run this webapp locally by running `npm start` from the project root.
 
-### How to run on Heroku
-1. Install Heroku CLI.
-2. Soon to come...
-
 ### Notes
 * If you want to add a node module, remember to use the `--save` flag so `npm` updates the `package.json` and `package-lock.json` files accordingly. If you want to add developer dependencies, use the `--save-dev` flag.
 * To only run the Node.js server locally, run `npm run server` from the project root.
 * Similarly, to only run the React client server locally, run `npm run client` from the project root.
+* WebGL must be enabled in order for the map to render.
+* Some fingerprint resisting security features on your browser may need to be disabled in order for certain map symbols to load correctly.

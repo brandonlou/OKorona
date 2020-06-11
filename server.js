@@ -9,7 +9,7 @@ const stdin = process.openStdin();
 const ObjectId = require("mongodb").ObjectId;
 
 const app = express();
-app.use(express.json());
+app.use(express.json()); // Parse JSON by default.
 
 // Handles getting all values within a rectangular area.
 app.post("/api/get_resource", async (req, res) => {
@@ -60,7 +60,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-// Handles logging in. Responds with the user ID and array of upvotes and dowvotes.
+// Handles logging in. Responds with the user ID,  array of upvotes and dowvotes, and their theme.
 app.post("/api/login", async (req, res) => {
   const content = req.body;
   const username = content.username.toLowerCase();
@@ -80,7 +80,7 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// Handles logging in. Responds with the user ID and array of upvotes and dowvotes.
+// Handles setting the user's theme. Requires the user's ID and theme name.
 app.post("/api/set_theme", async (req, res) => {
   const content = req.body;
   const userID = content.userID;
@@ -235,6 +235,7 @@ stdin.addListener("data", async (input) => {
 const mongoURL =
   "mongodb://nodeClient:cs97isgreat@ds253388.mlab.com:53388/heroku_bvrv3598";
 
+// Queries a user by their ID and updates their theme.
 const updateThemeMongo = async (userID, theme) => {
   const client = await mongo
     .connect(mongoURL, {
@@ -262,6 +263,7 @@ const updateThemeMongo = async (userID, theme) => {
   }
 };
 
+// Queries a resource by its ID and increments its vote based on amt.
 const updateResourceVotes = async (resourceID, amt) => {
   const client = await mongo
     .connect(mongoURL, {
@@ -287,6 +289,7 @@ const updateResourceVotes = async (resourceID, amt) => {
   }
 };
 
+// Queries a user by their ID and updates their array of upvotes and downvotes.
 const updateUserVotes = async (userID, votes) => {
   const client = await mongo
     .connect(mongoURL, {
@@ -314,6 +317,7 @@ const updateUserVotes = async (userID, votes) => {
   }
 };
 
+// Queries a user by their ID and returns an array of upvotes and downvotes.
 const findVotesMongo = async (userID) => {
   const client = await mongo
     .connect(mongoURL, {
@@ -344,6 +348,7 @@ const findVotesMongo = async (userID) => {
   return votes;
 };
 
+// Queries a user by their username and password and returns the user's information.
 const findUserMongo = async (username, password) => {
   const client = await mongo
     .connect(mongoURL, {
@@ -430,6 +435,7 @@ const addUserMongo = async (data) => {
   }
 };
 
+// Uses geospatial queries to get all the resources within the specified rectangular coordinates.
 const getResourcesMongo = async (topRight, botLeft) => {
   const client = await mongo
     .connect(mongoURL, {
@@ -468,18 +474,21 @@ const getResourcesMongo = async (topRight, botLeft) => {
   return resources;
 };
 
+// Helper function to update covid testing data when needed.
 const updateCovidTestingData = async () => {
   const data = await covidtests.getData();
   await addResourceMongo(data);
   console.log("Update covid testing data success!");
 };
 
+// Helper function to update foodbank data when needed.
 const updateFoodbankData = async () => {
   const data = await foodbanks.getData();
   await addResourceMongo(data);
   console.log("Update foodbank data success!");
 };
 
+// Helper function to update store data when needed.
 const updateStoreData = async () => {
   const data = await stores.getData();
   await addResourceMongo(data);
