@@ -25,7 +25,7 @@ export default class Mark extends React.Component {
   componentDidMount() {
     for (const resource of JSON.parse(localStorage.getItem("upvotes"))) {
       console.log(resource + " " + this.state.id);
-      if (this.state.id == resource) {
+      if (this.state.id === resource) {
         console.log("Upvoted");
         this.setState({
           userVote: 1,
@@ -33,7 +33,7 @@ export default class Mark extends React.Component {
       }
     }
     for (const resource of JSON.parse(localStorage.getItem("downvotes"))) {
-      if (this.state.id == resource)
+      if (this.state.id === resource)
         this.setState({
           userVote: -1,
         });
@@ -69,6 +69,28 @@ export default class Mark extends React.Component {
       case "good":
         /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
         if (upvotes.indexOf(resource) > -1) {
+          const index = upvotes.indexOf(resource);
+          upvotes.splice(index, 1);
+          this.setState({
+            votes: this.state.votes - 1,
+            userVote: 0,
+          });
+          fetch("./api/downvote", {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-type": "application/json",
+            },
+            body: JSON.stringify({
+              userID: user,
+              resourceID: resource,
+            }),
+          })
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => console.log(error));
+          localStorage.setItem("upvotes", JSON.stringify(upvotes));
           return;
         } else if (downvotes.indexOf(resource) > -1) {
           const index = downvotes.indexOf(resource);
@@ -106,6 +128,28 @@ export default class Mark extends React.Component {
       case "bad":
         /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
         if (downvotes.indexOf(resource) > -1) {
+          const index = downvotes.indexOf(resource);
+          downvotes.splice(index, 1);
+          this.setState({
+            votes: this.state.votes + 1,
+            userVote: 0,
+          });
+          fetch("./api/upvote", {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-type": "application/json",
+            },
+            body: JSON.stringify({
+              userID: user,
+              resourceID: resource,
+            }),
+          })
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => console.log(error));
+          localStorage.setItem("upvotes", JSON.stringify(downvotes));
           return;
         } else if (upvotes.indexOf(resource) > -1) {
           const index = upvotes.indexOf(resource);
@@ -138,6 +182,9 @@ export default class Mark extends React.Component {
             console.log(response);
           })
           .catch((error) => console.log(error));
+        break;
+      default:
+        return;
     }
   }
   render() {

@@ -42,14 +42,6 @@ export default class App extends React.Component {
       testing: [],
       autoComp: {},
     };
-    //marker to map style theme
-    // this.theme = [
-    //   {
-    //     name: "Frank",
-    //     markers: "red",
-    //     info: "pink",
-    //   },
-    // ];
     //these arrays hold the marker data until completely collected
     //afterwards they are transferred to the state arrays to update the map
     this.testing = [];
@@ -66,6 +58,7 @@ export default class App extends React.Component {
     //references
     this.markRefs = [];
     this.mapRef = React.createRef();
+    this.select = React.createRef();
     this.nav = null;
     this.map = null;
     this.tab = null;
@@ -93,14 +86,14 @@ export default class App extends React.Component {
   };
 
   //if the application has properly rendered
-  componentWillMount() {
+  UNSAFE_componentcomponentWillMount() {
     //create a navigation object that will get the user's location
     this.nav = new Nav(this.userLoc);
     this.nav.getLocation();
   }
 
   //If the component has updated,
-  componentDidUpdate() {
+  UNSAFE_componentDidUpdate() {
     if (this.map) {
       this.getLocations();
     }
@@ -354,6 +347,7 @@ export default class App extends React.Component {
                     option["geometry"]["coordinates"][0]
                   );
                   this.clearResults(true);
+                  return;
                 }}
                 key={option["id"]}
                 address={option["place_name"]}
@@ -371,8 +365,38 @@ export default class App extends React.Component {
       if (c !== i) this.markRefs[c].current.handleMarkerClick();
     }
   }
+
+  // getName(theme) {
+  //   switch (theme) {
+  //     case "mapbox://styles/ashleytz/ckaxpmear03nw1ilnsrbf75if":
+  //       return "Decimal";
+  //     case "mapbox://styles/ashleytz/ckaxps4bp0ukt1jpmt2uxbvg8":
+  //       return "Standard";
+  //     case "mapbox://styles/ashleytz/ckaxptnwn05b61ioon15refau":
+  //       return "Blueprint";
+  //     case "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50":
+  //       return "Frank";
+  //     case "mapbox://styles/mapbox/navigation-guidance-night-v4":
+  //       return "Night";
+  //     case "mapbox://styles/mapbox/navigation-guidance-day-v4":
+  //       return "Day";
+  //     case "mapbox://styles/mapbox/satellite-streets-v11":
+  //       return "Satellite Streets";
+  //     case "mapbox://styles/mapbox/satellite-v9":
+  //       return "Satellite";
+  //     case "mapbox://styles/mapbox/dark-v10":
+  //       return "Dark";
+  //     case "mapbox://styles/mapbox/light-v10":
+  //       return "Light";
+  //     case "mapbox://styles/mapbox/outdoors-v11":
+  //       return "Outdoors";
+  //     default:
+  //       // return "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
+  //       return "Day";
+  //   }
+  // }
+
   getTheme(name) {
-    console.log(name);
     switch (name) {
       case "Decimal":
         return "mapbox://styles/ashleytz/ckaxpmear03nw1ilnsrbf75if";
@@ -479,6 +503,10 @@ export default class App extends React.Component {
     let mapTHEME = localStorage.getItem("theme")
       ? localStorage.getItem("theme")
       : "mapbox://styles/mapbox/navigation-guidance-day-v4";
+    if (this.select.current) {
+      const name = this.getTheme(this.select.current.value);
+      if (name !== mapTHEME) this.select.current.value = 0;
+    }
     if (this.map) {
       const bounds = this.map.getMap().getBounds();
       maxLon = bounds._ne.lng + 0.1;
@@ -494,6 +522,7 @@ export default class App extends React.Component {
               this.setState({
                 showSign: false,
               });
+              return;
             }}
             changeTheme={this.changeTheme}
           />
@@ -507,6 +536,7 @@ export default class App extends React.Component {
               this.setState({
                 showForm: false,
               });
+              return;
             }}
             sendForm={(form) => this.sendForm(form)}
           />
@@ -522,6 +552,7 @@ export default class App extends React.Component {
         >
           <ReactMapGL
             {...this.state.viewport}
+            style={{ top: "0", bottom: "0", position: "absolute" }}
             width="100%"
             height="100%"
             maxZoom={20}
@@ -562,6 +593,7 @@ export default class App extends React.Component {
                       color="rgb(247, 129, 50)"
                     />
                   );
+                return <div></div>;
               })
             ) : (
               <div></div>
@@ -596,6 +628,7 @@ export default class App extends React.Component {
                       color="rgb(236, 59, 59)"
                     />
                   );
+                return <div></div>;
               })
             ) : (
               <div></div>
@@ -631,6 +664,7 @@ export default class App extends React.Component {
                       color="rgb(62, 226, 98)"
                     />
                   );
+                return <div></div>;
               })
             ) : (
               <div></div>
@@ -702,6 +736,7 @@ export default class App extends React.Component {
                     Customize Map:
                   </div>
                   <select
+                    ref={this.select}
                     onChange={(e) => {
                       this.changeTheme(e);
                     }}
