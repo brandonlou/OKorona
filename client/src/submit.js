@@ -62,7 +62,7 @@ export default class Submit extends React.Component {
     })
       .then((response) => {
         if (response["ok"] === false) {
-          alert("Gateway Timeout");
+          alert("Please enter a valid name and address.");
           return;
         }
         this.props.getLoc();

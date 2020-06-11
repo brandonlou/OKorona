@@ -15,7 +15,6 @@ export default class Mark extends React.Component {
       type: this.props.type,
       showInfo: false,
       color: this.props.color,
-      user: localStorage.getItem("userID"),
       votes: this.props.votes,
     };
     this.handleMarkerClick = this.handleMarkerClick.bind(this);
@@ -42,10 +41,22 @@ export default class Mark extends React.Component {
 
   increaseValue(value) {
     const user = localStorage.getItem("userID");
+    const upvotes = localStorage.getItem("upvotes");
+    const downvotes = localStorage.getItem("downvotes");
     const resource = this.state.id;
+    console.log(user + " " + resource);
     switch (value) {
       case "good":
         /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
+        if (resource in upvotes) {
+          return;
+        } else if (resource in downvotes) {
+          const index = downvotes.indexOf(resource);
+          upvotes.splice(index, 1);
+          this.setState({
+            votes: this.state.votes + 1,
+          });
+        }
         fetch("./api/upvote", {
           method: "POST",
           headers: {
@@ -58,10 +69,7 @@ export default class Mark extends React.Component {
           }),
         })
           .then((response) => {
-            if (response.statusText === "OK")
-              this.setState({
-                votes: this.state.votes + 1,
-              });
+            console.log(response);
           })
           .catch((error) => console.log(error));
         //fetch(post to database about the upvote)
@@ -70,13 +78,17 @@ export default class Mark extends React.Component {
         /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
         fetch("./api/downvote", {
           method: "POST",
-          headers: { "Content-type": "application/json" },
+          headers: {
+            Accept: "application/json",
+            "Content-type": "application/json",
+          },
           body: JSON.stringify({
             userID: user,
             resourceID: resource,
           }),
         })
           .then((response) => {
+            console.log(response);
             if (response.statusText === "OK")
               this.setState({
                 votes: this.state.votes + 1,
@@ -85,6 +97,8 @@ export default class Mark extends React.Component {
           .catch((error) => console.log(error));
 
         //fetch(post to database about the upvote)
+        break;
+      default:
         break;
     }
   }
@@ -128,9 +142,9 @@ export default class Mark extends React.Component {
                 />
               </svg>
             </div>
-            <div>Address: {this.state.address}</div>
+            <div>{this.state.address}</div>
             <div>
-              Facility Type:{" "}
+              Resource Type:{" "}
               {this.state.type
                 .replace("_", " ")
                 .replace(/(?:\s(.))|(?:^(.))/g, (c) =>
