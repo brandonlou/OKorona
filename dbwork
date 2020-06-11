@@ -1,2 +1,4 @@
 - set up database
 - checked syntax formatting and ability to push documents into collection
+- added indexing for query optimization
+- partially filtered database for uniqueness
