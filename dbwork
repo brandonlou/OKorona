@@ -1,4 +1,4 @@
-- set up database
+- set up MongoDB database (as opposed to SQL, after doing research about the differences)
 - checked syntax formatting and ability to push documents into collection
 - added indexing for query optimization
 - Deleted test and wrongly formatted locations in the database
