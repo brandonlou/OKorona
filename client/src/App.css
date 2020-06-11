@@ -129,6 +129,7 @@
 }
 
 .markerHead {
+  position: relative;
   display: flex;
   overflow: hidden;
   z-index: 100;
@@ -147,9 +148,9 @@
   border: 3px solid rgb(187, 183, 163);
   overflow: hidden;
   background-color: rgb(255, 253, 244);
-  font-size: 1.5vw;
-  width: 25vmax;
-  height: 20vmax;
+  font-size: 1vw;
+  width: 20vmax;
+  height: 15vmax;
   border-radius: 5px;
   padding: 3px;
   display: flex;

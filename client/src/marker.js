@@ -230,9 +230,9 @@ export default class Mark extends React.Component {
                 />
               </svg>
             </div>
-            <div>Address: {this.state.address}</div>
+            <div>{this.state.address}</div>
             <div>
-              Facility Type:{" "}
+              Resource Type:{" "}
               {this.state.type
                 .replace("_", " ")
                 .replace(/(?:\s(.))|(?:^(.))/g, (c) =>

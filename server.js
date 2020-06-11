@@ -82,7 +82,6 @@ app.post("/api/login", async (req, res) => {
 
 // Handles logging in. Responds with the user ID and array of upvotes and dowvotes.
 app.post("/api/set_theme", async (req, res) => {
-  console.log(req);
   const content = req.body;
   const userID = content.userID;
   const theme = content.theme;
