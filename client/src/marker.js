@@ -3,6 +3,7 @@ import { Marker } from "react-map-gl";
 
 const navigateBaseUrl = "https://www.google.com/maps/dir/";
 
+//Component for markers
 export default class Mark extends React.Component {
   constructor(props) {
     super(props);
@@ -22,6 +23,8 @@ export default class Mark extends React.Component {
     this.handleClick = this.handleClick.bind(this);
     this.handleNavigate = this.handleNavigate.bind(this);
   }
+
+  //check to see if the user is logged in and if they are, check whether they have upvoted an item
   componentDidMount() {
     for (const resource of JSON.parse(localStorage.getItem("upvotes"))) {
       console.log(resource + " " + this.state.id);
@@ -39,35 +42,45 @@ export default class Mark extends React.Component {
         });
     }
   }
+
+  //open marker info box
   handleMarkerClick() {
     this.setState({
       showInfo: true,
     });
   }
 
+  //close marker info box
   handleClick() {
     this.setState({
       showInfo: false,
     });
   }
 
+  //navigation button opens up a google maps navigation tab
   handleNavigate() {
     window.open(
       navigateBaseUrl + "/" + this.state.lat + "," + this.state.lon + "/@?hl=en"
     );
   }
 
+  //handles the up or downvote of a user
   increaseValue(value) {
+    //get local variables
     const user = localStorage.getItem("userID");
     let upvotes = JSON.parse(localStorage.getItem("upvotes"));
     let downvotes = JSON.parse(localStorage.getItem("downvotes"));
     const resource = this.state.id;
-    console.log(user + " " + resource);
-    console.log(upvotes);
-    console.log(downvotes);
+
+    //check whether it's an upvote or downvote
     switch (value) {
       case "good":
-        /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
+        /***IF USER VOTED ALREADY SWITCH THE VOTES
+         * Clicking the same vote will undo the vote
+         * Clicking the opposite vote will undo the vote AND add another extra vote
+         ***/
+
+        //undo
         if (upvotes.indexOf(resource) > -1) {
           const index = upvotes.indexOf(resource);
           upvotes.splice(index, 1);
@@ -92,14 +105,18 @@ export default class Mark extends React.Component {
             .catch((error) => console.log(error));
           localStorage.setItem("upvotes", JSON.stringify(upvotes));
           return;
+
+          //undo and vote opposite
         } else if (downvotes.indexOf(resource) > -1) {
           const index = downvotes.indexOf(resource);
           downvotes.splice(index, 1);
           this.setState({
-            votes: this.state.votes + 1,
+            votes: this.state.votes + 2,
             userVote: 0,
           });
           localStorage.setItem("downvotes", JSON.stringify(downvotes));
+
+          //normal upvote
         } else {
           upvotes.push(resource);
           this.setState({
@@ -108,6 +125,8 @@ export default class Mark extends React.Component {
           });
         }
         localStorage.setItem("upvotes", JSON.stringify(upvotes));
+
+        //send data afterwards so realtime updates show up faster
         fetch("./api/upvote", {
           method: "POST",
           headers: {
@@ -123,10 +142,10 @@ export default class Mark extends React.Component {
             console.log(response);
           })
           .catch((error) => console.log(error));
-        //fetch(post to database about the upvote)
         break;
+
       case "bad":
-        /***IF USER VOTED ALREADY SWITCH THE VOTES ***/
+        //undo
         if (downvotes.indexOf(resource) > -1) {
           const index = downvotes.indexOf(resource);
           downvotes.splice(index, 1);
@@ -151,14 +170,18 @@ export default class Mark extends React.Component {
             .catch((error) => console.log(error));
           localStorage.setItem("upvotes", JSON.stringify(downvotes));
           return;
+
+          //undo AND add another vote
         } else if (upvotes.indexOf(resource) > -1) {
           const index = upvotes.indexOf(resource);
           upvotes.splice(index, 1);
           this.setState({
-            votes: this.state.votes - 1,
+            votes: this.state.votes - 2,
             userVote: 0,
           });
           localStorage.setItem("downvotes", JSON.stringify(upvotes));
+
+          //normal downvote
         } else {
           downvotes.push(resource);
           this.setState({
@@ -167,6 +190,7 @@ export default class Mark extends React.Component {
           });
         }
         localStorage.setItem("downvotes", JSON.stringify(downvotes));
+
         fetch("./api/downvote", {
           method: "POST",
           headers: {
@@ -183,10 +207,13 @@ export default class Mark extends React.Component {
           })
           .catch((error) => console.log(error));
         break;
+
+      //should never be default built_in_unreachable() right here
       default:
         return;
     }
   }
+
   render() {
     return (
       <Marker latitude={this.state.lat} longitude={this.state.lon}>

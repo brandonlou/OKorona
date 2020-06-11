@@ -1,3 +1,4 @@
+//Sends request for user location, if not allowed, the application will return to Los Angeles
 export default class Nav {
   constructor(props) {
     this.props = props;

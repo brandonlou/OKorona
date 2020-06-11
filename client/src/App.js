@@ -96,11 +96,19 @@ export default class App extends React.Component {
   //If the component has updated,
   UNSAFE_componentDidUpdate() {
     if (this.map) {
+      //get locations of items
       this.getLocations();
     }
   }
 
+  //gets information for markers
   getLocations() {
+    /*
+    This entire section calculates the distance from the initial calculation of
+    locations to where the user is currently at. After the user has moved a decent amount from the 
+    initial position, the application will re-fetch the information to update the map
+    The purpose of this calculation is to reduce computation.
+    */
     const bounds = this.map.getMap().getBounds();
     const halfLat = (bounds._ne.lat - bounds._sw.lat) / 2;
     const halfLon = (bounds._ne.lng - bounds._sw.lng) / 2;
@@ -111,9 +119,9 @@ export default class App extends React.Component {
       Math.pow(this.state.viewport.latitude - this.origin[0], 2) +
         Math.pow(this.state.viewport.longitude - this.origin[1], 2)
     );
+
+    //if the user has moved far enough or the user has teleported using search, fetch information
     if ((radius > maxRad - 0.4) | this.change) {
-      // console.log(maxRad);
-      // console.log(radius);
       fetch("./api/get_resource", {
         method: "POST",
         headers: {
@@ -129,10 +137,12 @@ export default class App extends React.Component {
       })
         .then((res) => res.json())
         .then((json) => {
-          // console.log(json);
+          //reset information arrays
           this.testing = [];
           this.foodbanks = [];
           this.stores = [];
+
+          //for every item, split the items into the different categories and only add the item to the array if there is no matching id
           for (const obj of json) {
             let add = true;
             switch (obj.type) {
@@ -173,6 +183,7 @@ export default class App extends React.Component {
                 break;
             }
 
+            //set state to re-render the application
             this.setState({
               testing: this.testing,
               foodbanks: this.foodbanks,
@@ -181,16 +192,24 @@ export default class App extends React.Component {
           }
         })
         .catch((error) => console.log(error));
+
+      //reset the origin so that future radius calculations are okay
       this.origin = [
         this.state.viewport.latitude,
         this.state.viewport.longitude,
       ];
+
+      //switch change to false if it was true coming into the method
       this.change = false;
     }
   }
 
+  //changes the viewport to the location specified by the user
   userLoc(lat, lon, home = false) {
+    //if the coordinates are invalid return
     if (!lat || !lon) return;
+
+    //else re-set the viewport
     this.setState({
       viewport: {
         width: 400,
@@ -201,6 +220,8 @@ export default class App extends React.Component {
         clear: true,
       },
     });
+
+    //if the user provides location, save this into application for later use
     if (home) {
       let endpoint =
         "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
@@ -216,10 +237,17 @@ export default class App extends React.Component {
           this.userHome = results["features"][0];
         });
     }
+    //set change to true, reset the origin, and get new locations
     this.change = true;
     this.origin = [lat, lon];
     if (this.map) this.getLocations();
   }
+
+  /*
+  if the component has mounted, check to see if the user has visited already
+  if not, show the welcome pop up
+  set the map reference and get locations
+  */
   componentDidMount() {
     this.map = this.mapRef.current;
     let visited = localStorage["visited"];
@@ -237,93 +265,27 @@ export default class App extends React.Component {
     this.getLocations();
   }
 
+  //clear the options search window
   clearResults(bool) {
     this.setState({
       clear: bool,
     });
   }
 
+  //search again for options (for the sake of reducing the amount of requests we send to mapbox)
   reSearch(bool) {
     this.research = bool;
   }
 
-  // getZipInBound() {
-  //   this.zips = [];
-  //   const diffLat =
-  //     (this.state.bounds["maxLat"] - this.state.bounds["minLat"] + 0.2) * 0.1;
-  //   const diffLon =
-  //     (this.state.bounds["maxLon"] - this.state.bounds["minLon"] + 0.2) * 0.1;
-  //   for (
-  //     let i = this.state.bounds["minLat"] - 0.1;
-  //     i <= this.state.bounds["maxLat"] + 0.1;
-  //     i += diffLat
-  //   ) {
-  //     for (
-  //       let j = this.state.bounds["minLon"] - 0.1;
-  //       j <= this.state.bounds["maxLon"] + 0.1;
-  //       j += diffLon
-  //     ) {
-  //       this.getZip(i, j);
-  //     }
-  //   }
-  // }
-
-  // getZip(lat, lon) {
-  // let endpoint =
-  //   "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
-  //   lon +
-  //   "%2C%20" +
-  //   lat;
-  // let query =
-  //   ".json?access_token=pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw";
-  // fetch(endpoint + query)
-  //   .then((response) => response.json())
-  //   .then((results) => {
-  //     let zip = null;
-  //     if (!results["features"]) return;
-  //     for (const id of results["features"]["0"]["context"]) {
-  //       if (id["id"].startsWith("postcode")) zip = parseInt(id["text"]);
-  //     }
-  //     if (!zip) {
-  //       return;
-  //     }
-  //     if (!(this.zips.indexOf(zip) >= 0)) this.zips.push(zip);
-  //     });
-  // }
-  // getFoodbanks(zip) {
-  //   if (!this.state.showFoodbanks) return;
-  //   fetch("foodbanks/" + zip)
-  //     .then((response) => response.json())
-  //     .then((results) => {
-  //       for (const result of results) {
-  //         let endpoint =
-  //           "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
-  //           result["address"].replace(" ", "+");
-  //         let query =
-  //           ".json?&access_token=pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw";
-  //         fetch(endpoint + query)
-  //           .then((response2) => response2.json())
-  //           .then((results2) => {
-  //             if (results2["features"]) {
-  //               for (const bank of this.foodbanks) {
-  //                 if (bank["id"] === results2["features"][0]["id"]) return;
-  //               }
-  //               this.foodbanks.push(results2["features"][0]);
-  //             }
-  //           });
-  //       }
-  //     });
-  // }
-
+  //autocomplete the user's search with related locations
   autoComplete(address) {
     if (!this.research) return;
-    this.setState({
-      clear: false,
-    });
+
     let endpoint =
       "https://api.mapbox.com/geocoding/v5/mapbox.places/" + address;
     let query =
       ".json?&access_token=pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw";
+
     fetch(endpoint + query)
       .then((response) => response.json())
       .then((results) => {
@@ -334,10 +296,13 @@ export default class App extends React.Component {
       .catch((error) => {
         return console.log(error);
       });
+
+    //set the clear booleans to false
     this.reSearch(false);
     this.clearResults(false);
   }
 
+  //return the autocomplete options as html components for the user to see and interact with
   getOptions() {
     if (this.state.clear) return;
 
@@ -368,43 +333,7 @@ export default class App extends React.Component {
     }
   }
 
-  // singleMarker(i) {
-  //   for (let c = 0; c < this.markRefs.length(); c++) {
-  //     console.log(this.markRefs[c].current);
-  //     if (c !== i) this.markRefs[c].current.handleMarkerClick();
-  //   }
-  // }
-
-  // getName(theme) {
-  //   switch (theme) {
-  //     case "mapbox://styles/ashleytz/ckaxpmear03nw1ilnsrbf75if":
-  //       return "Decimal";
-  //     case "mapbox://styles/ashleytz/ckaxps4bp0ukt1jpmt2uxbvg8":
-  //       return "Standard";
-  //     case "mapbox://styles/ashleytz/ckaxptnwn05b61ioon15refau":
-  //       return "Blueprint";
-  //     case "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50":
-  //       return "Frank";
-  //     case "mapbox://styles/mapbox/navigation-guidance-night-v4":
-  //       return "Night";
-  //     case "mapbox://styles/mapbox/navigation-guidance-day-v4":
-  //       return "Day";
-  //     case "mapbox://styles/mapbox/satellite-streets-v11":
-  //       return "Satellite Streets";
-  //     case "mapbox://styles/mapbox/satellite-v9":
-  //       return "Satellite";
-  //     case "mapbox://styles/mapbox/dark-v10":
-  //       return "Dark";
-  //     case "mapbox://styles/mapbox/light-v10":
-  //       return "Light";
-  //     case "mapbox://styles/mapbox/outdoors-v11":
-  //       return "Outdoors";
-  //     default:
-  //       // return "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
-  //       return "Day";
-  //   }
-  // }
-
+  //for finding the URL of a map theme
   getTheme(name) {
     switch (name) {
       case "Decimal":
@@ -433,18 +362,15 @@ export default class App extends React.Component {
         return "mapbox://styles/mapbox/navigation-guidance-day-v4";
     }
   }
+
+  //when the user wants to change themes / switch to user-saved theme
   changeTheme(e) {
+    //if e is an event vs if e is a name
     const change = e.target.value ? e.target.value : e;
     let theme = this.getTheme(change);
+
+    //if user is logged in, save theme
     if (e.target.value && localStorage.getItem("userID")) {
-      console.log(localStorage.getItem("userID"));
-      console.log(theme);
-      console.log(
-        JSON.stringify({
-          userID: localStorage.getItem("userID"),
-          theme: theme,
-        })
-      );
       fetch("./api/set_theme", {
         method: "POST",
         headers: {
@@ -457,57 +383,34 @@ export default class App extends React.Component {
         }),
       })
         .then((response) => {
-          console.log(response);
           localStorage.setItem("theme", theme);
         })
         .catch((error) => console.log(error));
     }
+
+    //set the style
     if (this.map) {
       this.map.getMap().setStyle(theme);
     }
   }
 
-  // componentWillUpdate() {
-  // if (this.zips.length > 0) {
-  //   for (const zip of this.zips) {
-  //     this.getFoodbanks(zip);
-  //   }
-  // }
-  // if (this.foodbanks) {
-  //   this.pastFood = this.foodbanks.slice(0);
-  // }
-  // }
-  // bringToTop(obj) {
-  //   let elem = this.elements;
-  //   if (!obj) return;
-  //   console.log(obj);
-  //   window.getComputedStyle(obj).getPropertyValue("z-index") =
-  //   obj.style.zIndex = 10;
-  //   for (let i = 0; i < elem.length; i++) {
-  //     if (elem[i]["id"] !== obj.state["id"]) {
-  //       elem[i]["Ref"].current.style.zIndex = 1;
-  //     }
-  //   }
-  //   for (let j = 0; j < elem.length; j++) {
-  //     elem[j]["Ref"].current.handleClick = function (num) {
-  //       for (let k = 0; k < elem.length; k++) {
-  //         if (elem) {
-  //           elem[k]["Ref"].current.style.zIndex = 10;
-  //         } else {
-  //           elem[k]["Ref"].current.style.zIndex = 1;
-  //         }
-  //       }
-  //     };
-  //     console.log(elem[j]["Ref"].current.handleClick);
-  //   }
-  // }
-
   render() {
+    //calculation of closer boundaries so that the map doesn't have to render all of the resources in the array every time
     let count = 0;
     let maxLon = 0;
     let maxLat = 0;
     let minLon = 0;
     let minLat = 0;
+
+    if (this.map) {
+      const bounds = this.map.getMap().getBounds();
+      maxLon = bounds._ne.lng + 0.1;
+      maxLat = bounds._ne.lat + 0.1;
+      minLon = bounds._sw.lng - 0.1;
+      minLat = bounds._sw.lat - 0.1;
+    }
+
+    //if the map theme is stored in localStorage ==> set theme
     let mapTHEME = localStorage.getItem("theme")
       ? localStorage.getItem("theme")
       : "mapbox://styles/mapbox/navigation-guidance-day-v4";
@@ -516,13 +419,7 @@ export default class App extends React.Component {
       if (name !== "mapbox://styles/mapbox/navigation-guidance-day-v4")
         this.select.current.value = 0;
     }
-    if (this.map) {
-      const bounds = this.map.getMap().getBounds();
-      maxLon = bounds._ne.lng + 0.1;
-      maxLat = bounds._ne.lat + 0.1;
-      minLon = bounds._sw.lng - 0.1;
-      minLat = bounds._sw.lat - 0.1;
-    }
+
     return (
       <div className="App">
         {this.state.welcome ? (
