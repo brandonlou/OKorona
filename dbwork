@@ -1,4 +1,6 @@
 - set up database
 - checked syntax formatting and ability to push documents into collection
 - added indexing for query optimization
-- partially filtered database for uniqueness
+- Deleted test and wrongly formatted locations in the database
+- Filtered through database and removed all duplicate locations with conflicting addresses and coordinates
+- added uniqueness constraint for resource location address and coordinates since no two locations should have the same address or coordinates
