@@ -664,16 +664,7 @@ export default class App extends React.Component {
 
               <div className="bar">
                 <div className="column space">
-                  <div
-                    onClick={() => {
-                      this.setState({
-                        showForm: false,
-                        showSign: true,
-                      });
-                    }}
-                  >
-                    Customize Map:
-                  </div>
+                  <div>Customize Map:</div>
                   <select
                     ref={this.select}
                     onChange={(e) => {
