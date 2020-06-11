@@ -39,13 +39,14 @@ export default class SignUp extends React.Component {
 
   invalid() {
     if (!(this.state.invalidLogin || this.state.invalidSignup)) return;
-    const msg = this.signup
+    const msg = this.state.signup
       ? "This username/email is already in use!"
       : "Invalid username and password combination!";
     return <div className="invalid">{msg}</div>;
   }
 
   handleSubmit = async (e) => {
+    e.persist();
     this.setState({
       invalidLogin: false,
       invalidSignup: false,
@@ -53,6 +54,7 @@ export default class SignUp extends React.Component {
     console.log(e);
     e.preventDefault();
     if (this.state.signup) {
+      console.log("Signup");
       fetch("./api/register", {
         method: "POST",
         headers: {
@@ -75,34 +77,38 @@ export default class SignUp extends React.Component {
               invalidLogin: false,
             });
           }
+          this.props.onClick();
         })
-        .catch((error) => console.log(error));
+        .catch(() => {
+          this.setState({
+            invalidSignup: true,
+            invalidLogin: false,
+          });
+        });
     } else {
-      fetch("api/login", {
+      fetch("./api/login", {
         method: "POST",
         headers: {
+          Accept: "application/json",
           "Content-type": "application/json",
         },
         body: JSON.stringify({
           username: this.state.user,
           password: this.state.pass,
-          // signup: "" + this.state.signup,
-          // email: this.state.signup ? this.state.email : "",
         }),
       })
-        .then((response) => response.json())
         .then((response) => {
           console.log(response);
-          e.preventDefault();
-          if (response["ok"] === false) {
-            this.setState({
-              timeout: true,
-            });
-          } else {
-            localStorage.setItem("userID", response["userID"]);
-            localStorage.setItem("upvotes", response["upvotes"]);
-            this.props.onClick();
-          }
+          return response.json();
+        })
+        .then((response) => {
+          console.log(response);
+          localStorage.setItem("userID", response["id"]);
+          localStorage.setItem("upvotes", response["upvotes"]);
+          localStorage.setItem("downvotes", response["downvotes"]);
+          localStorage.setItem("theme", response["theme"]);
+          this.props.onClick();
+          this.props.changeTheme();
         })
         .catch((error) => {
           console.log(error);
@@ -147,13 +153,7 @@ export default class SignUp extends React.Component {
               />
             </svg>
           </div>
-          {() => {
-            this.setState({
-              invalidLogin: false,
-              invalidSignup: false,
-            });
-            return this.invalid();
-          }}
+          {this.invalid()}
           <div
             style={{
               display: "flex",

@@ -8,6 +8,7 @@ import Nav from "./Nav.js";
 import Mark from "./marker.js";
 import Submit from "./submit.js";
 import SignUp from "./signup.js";
+import fetch from "node-fetch";
 
 //Entire Application
 export default class App extends React.Component {
@@ -42,13 +43,13 @@ export default class App extends React.Component {
       autoComp: {},
     };
     //marker to map style theme
-    this.theme = [
-      {
-        name: "Frank",
-        markers: "red",
-        info: "pink",
-      },
-    ];
+    // this.theme = [
+    //   {
+    //     name: "Frank",
+    //     markers: "red",
+    //     info: "pink",
+    //   },
+    // ];
     //these arrays hold the marker data until completely collected
     //afterwards they are transferred to the state arrays to update the map
     this.testing = [];
@@ -219,14 +220,11 @@ export default class App extends React.Component {
         .then((results) => {
           if (!results["features"]) return;
           this.userHome = results["features"][0];
-          console.log(this.userHome);
-          console.log("Hi");
         });
     }
     this.change = true;
     this.origin = [lat, lon];
-    console.log("changed locations");
-    this.getLocations();
+    if (this.map) this.getLocations();
   }
   componentDidMount() {
     this.map = this.mapRef.current;
@@ -234,7 +232,6 @@ export default class App extends React.Component {
     if (this.nav !== null) {
       this.userLoc(this.nav.latitude, this.nav.longitude);
     }
-
     this.getLocations();
   }
 
@@ -374,6 +371,69 @@ export default class App extends React.Component {
       if (c !== i) this.markRefs[c].current.handleMarkerClick();
     }
   }
+  getTheme(name) {
+    console.log(name);
+    switch (name) {
+      case "Decimal":
+        return "mapbox://styles/ashleytz/ckaxpmear03nw1ilnsrbf75if";
+      case "Standard":
+        return "mapbox://styles/ashleytz/ckaxps4bp0ukt1jpmt2uxbvg8";
+      case "Blueprint":
+        return "mapbox://styles/ashleytz/ckaxptnwn05b61ioon15refau";
+      case "Frank":
+        return "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
+      case "Night":
+        return "mapbox://styles/mapbox/navigation-guidance-night-v4";
+      case "Day":
+        return "mapbox://styles/mapbox/navigation-guidance-day-v4";
+      case "Satellite Streets":
+        return "mapbox://styles/mapbox/satellite-streets-v11";
+      case "Satellite":
+        return "mapbox://styles/mapbox/satellite-v9";
+      case "Dark":
+        return "mapbox://styles/mapbox/dark-v10";
+      case "Light":
+        return "mapbox://styles/mapbox/light-v10";
+      case "Outdoors":
+        return "mapbox://styles/mapbox/outdoors-v11";
+      default:
+        // return "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
+        return "mapbox://styles/mapbox/navigation-guidance-day-v4";
+    }
+  }
+  changeTheme(e) {
+    const change = e.target.value ? e.target.value : e;
+    let theme = this.getTheme(change);
+    if (e.target.value && localStorage.getItem("userID")) {
+      console.log(localStorage.getItem("userID"));
+      console.log(theme);
+      console.log(
+        JSON.stringify({
+          userID: localStorage.getItem("userID"),
+          theme: theme,
+        })
+      );
+      fetch("./api/set_theme", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          userID: localStorage.getItem("userID"),
+          theme: change,
+        }),
+      })
+        .then((response) => {
+          console.log(response);
+          localStorage.setItem("theme", theme);
+        })
+        .catch((error) => console.log(error));
+    }
+    if (this.map) {
+      this.map.getMap().setStyle(theme);
+    }
+  }
 
   // componentWillUpdate() {
   // if (this.zips.length > 0) {
@@ -416,6 +476,9 @@ export default class App extends React.Component {
     let maxLat = 0;
     let minLon = 0;
     let minLat = 0;
+    let mapTHEME = localStorage.getItem("theme")
+      ? localStorage.getItem("theme")
+      : "mapbox://styles/mapbox/navigation-guidance-day-v4";
     if (this.map) {
       const bounds = this.map.getMap().getBounds();
       maxLon = bounds._ne.lng + 0.1;
@@ -432,6 +495,7 @@ export default class App extends React.Component {
                 showSign: false,
               });
             }}
+            changeTheme={this.changeTheme}
           />
         ) : (
           <div />
@@ -464,7 +528,7 @@ export default class App extends React.Component {
             minZoom={10}
             mapboxApiAccessToken="pk.eyJ1IjoiYXNobGV5dHoiLCJhIjoiY2s5ajV4azIwMDQ4aDNlbXAzZnlwZ2U0YyJ9.P2n2zrXhGxl1xhFoEdNTnw"
             onViewportChange={this._onViewportChange}
-            mapStyle="mapbox://styles/mapbox/navigation-guidance-day-v4"
+            mapStyle={mapTHEME}
             ref={this.mapRef}
           >
             {this.state.showFoodbanks === true && this.foodbanks ? (
@@ -514,7 +578,6 @@ export default class App extends React.Component {
                 )
                   return (
                     <Mark
-                      style={{ position: "fixed", zIndex: "0" }}
                       ref={this.markRefs[count]}
                       key={pt["_id"]}
                       id={pt["_id"]}
@@ -640,58 +703,7 @@ export default class App extends React.Component {
                   </div>
                   <select
                     onChange={(e) => {
-                      let theme = "";
-                      switch (e.target.value) {
-                        case "Decimal":
-                          theme =
-                            "mapbox://styles/ashleytz/ckaxpmear03nw1ilnsrbf75if";
-                          break;
-                        case "Standard":
-                          theme =
-                            "mapbox://styles/ashleytz/ckaxps4bp0ukt1jpmt2uxbvg8";
-                          break;
-                        case "Blueprint":
-                          theme =
-                            "mapbox://styles/ashleytz/ckaxptnwn05b61ioon15refau";
-                          break;
-                        case "Frank":
-                          theme =
-                            "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
-                          break;
-                        case "Night":
-                          theme =
-                            "mapbox://styles/mapbox/navigation-guidance-night-v4";
-                          break;
-                        case "Day":
-                          theme =
-                            "mapbox://styles/mapbox/navigation-guidance-day-v4";
-                          break;
-                        case "Satellite Streets":
-                          theme =
-                            "mapbox://styles/mapbox/satellite-streets-v11";
-                          break;
-                        case "Satellite":
-                          theme = "mapbox://styles/mapbox/satellite-v9";
-                          break;
-                        case "Dark":
-                          theme = "mapbox://styles/mapbox/dark-v10";
-                          break;
-                        case "Light":
-                          theme = "mapbox://styles/mapbox/light-v10";
-                          break;
-                        case "Outdoors":
-                          theme = "mapbox://styles/mapbox/outdoors-v11";
-                          break;
-                        default:
-                          // theme = "mapbox://styles/ashleytz/ckaepanj10jmq1hr4ivacke50";
-                          theme =
-                            "mapbox://styles/mapbox/navigation-guidance-day-v4";
-                      }
-
-                      if (this.map) {
-                        console.log(this.map.getMap());
-                        this.map.getMap().setStyle(theme);
-                      }
+                      this.changeTheme(e);
                     }}
                   >
                     <option value="Day">Day</option>

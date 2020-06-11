@@ -44,9 +44,9 @@ app.post("/api/register", async (req, res) => {
     res.status(404).send("Did not specify username, password, or email.");
   } else {
     const user = {
-      username: content.username,
+      username: content.username.toLowerCase(),
       password: content.password,
-      email: content.email,
+      email: content.email.toLowerCase(),
       upvotes: [],
       downvotes: [],
       theme: "Day",
@@ -63,7 +63,7 @@ app.post("/api/register", async (req, res) => {
 // Handles logging in. Responds with the user ID and array of upvotes and dowvotes.
 app.post("/api/login", async (req, res) => {
   const content = req.body;
-  const username = content.username;
+  const username = content.username.toLowerCase();
   const password = content.password;
   const userInfo = await findUserMongo(username, password);
   if (userInfo) {
@@ -82,9 +82,11 @@ app.post("/api/login", async (req, res) => {
 
 // Handles logging in. Responds with the user ID and array of upvotes and dowvotes.
 app.post("/api/set_theme", async (req, res) => {
+  console.log(req);
   const content = req.body;
   const userID = content.userID;
   const theme = content.theme;
+  console.log(theme + " " + userID);
   if (!userID || !theme) {
     console.log("No user or theme specified.");
     res.status(404).send("No user or theme specified.");
@@ -366,6 +368,7 @@ const findUserMongo = async (username, password) => {
         _id: res._id,
         upvotes: res.upvotes,
         downvotes: res.downvotes,
+        theme: res.theme,
       };
     }
   } catch (err) {

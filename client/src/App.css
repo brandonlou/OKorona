@@ -196,9 +196,8 @@
 
 .invalid {
   position: fixed;
-  width: 60%;
-  height: 3vh;
-  left: 50%;
+  right: 5%;
+  top: 30%;
   z-index: 200;
   background-color: rgb(245, 242, 207);
   color: crimson;
