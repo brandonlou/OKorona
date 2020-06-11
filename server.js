@@ -167,7 +167,7 @@ app.post("/api/upvote", async (req, res) => {
     }
 
     await updateUserVotes(userID, userVotes);
-    await updateResourceVotes(resourceID, -1);
+    await updateResourceVotes(resourceID, 1);
     res.status(200).send("Upvote Success!");
   }
 });
@@ -203,7 +203,7 @@ app.post("/api/downvote", async (req, res) => {
     }
 
     await updateUserVotes(userID, userVotes);
-    await updateResourceVotes(resourceID, 1);
+    await updateResourceVotes(resourceID, -1);
     res.status(200).send("Downvote Success!");
   }
 });

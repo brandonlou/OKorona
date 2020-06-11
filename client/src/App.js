@@ -420,7 +420,7 @@ export default class App extends React.Component {
         },
         body: JSON.stringify({
           userID: localStorage.getItem("userID"),
-          theme: change,
+          theme: theme,
         }),
       })
         .then((response) => {
